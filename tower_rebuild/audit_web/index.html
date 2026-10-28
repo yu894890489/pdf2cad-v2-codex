@@ -1,0 +1,9 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>图纸尺寸初审</title><link rel="stylesheet" href="style.css"></head>
+<body><header><div><small>本地图纸工作台</small><h1>尺寸初审</h1><p id="title"></p></div><a href="../topology/">返回逐面结构图</a></header>
+<main><div id="error" hidden role="alert"></div><p id="summary">正在读取审核数据…</p><div class="controls"><label>结构面 <select id="view"><option value="">全部视图</option></select></label><a href="report.json" download>下载计算与证据 JSON</a></div>
+<section><h2>逐面审核进度</h2><p class="hint">逐面查看已完成计算和缺失依据。下列计数为尺寸图与候选观察记录，不是实物数量；未发现冲突不代表该面已经全部通过。</p><div class="table" tabindex="0" aria-label="逐面结果，可横向滚动"><table id="view-summary-table"><thead><tr><th>结构面</th><th>尺寸图</th><th>闭合吻合 / 冲突</th><th>对应待定</th><th>BOM 换算吻合 / 已算</th><th>换算依据不足</th><th>初审结论</th></tr></thead><tbody id="view-summaries"></tbody></table></div></section>
+<section><h2>初审判断与候选对比</h2><p class="hint">同时比较尺寸闭合、相邻图的计算结果和 BOM 换算。只有通过可用检查的唯一候选才给出优先核对建议；对应关系与基准仍需确认。</p><div id="findings"></div></section>
+<section><h2>跨度、端部尺寸与 BOM 换算</h2><p class="hint">沿相邻示意图补齐同一直杆的分段跨度，再使用图上明确的正负尺寸换算下料长度。下列结果以对应关系和端部基准正确为前提。</p><div id="spans" class="grid"></div><details><summary id="pending-summary">缺少换算依据的尺寸边</summary><div class="table"><table><thead><tr><th>结构面 / 件号</th><th>已知尺寸边</th><th>BOM 下料长</th><th>缺失条件</th></tr></thead><tbody id="pending-spans"></tbody></table></div></details></section>
+<section><h2>尺寸三角形与多边形</h2><div id="polygons" class="grid"></div></section>
+<section><h2>杆旁规格、长度与 BOM</h2><p class="hint">核对角钢截面尺寸和下料长度；钢材牌号不在本项验收范围。圈号或轮廓对应存在疑点时单独标明。</p><div class="table"><table><thead><tr><th>结构面 / 件号</th><th>杆旁标注</th><th>BOM</th><th>结果与对应疑点</th></tr></thead><tbody id="annotations"></tbody></table></div></section>
+<section><h2>范围与尚未解决的条件</h2><ul id="limitations"></ul></section></main><script src="app.js" defer></script></body></html>

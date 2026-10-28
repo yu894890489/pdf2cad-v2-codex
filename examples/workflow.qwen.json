@@ -1,0 +1,20 @@
+{
+  "schema_version": "1.0",
+  "name": "原生几何与已配置的 Qwen 视觉复核",
+  "diagnostic_tolerance_mm": 3,
+  "vision_review": {
+    "enabled": true,
+    "max_views": 24,
+    "service": {
+      "provider": "anthropic",
+      "anthropic_output_mode": "tool",
+      "base_url": "https://coding.dashscope.aliyuncs.com/apps/anthropic",
+      "allow_remote": true,
+      "model": "qwen3.7-plus",
+      "api_key_env": "QWEN_API_KEY",
+      "request_timeout_seconds": 180,
+      "max_tokens": 6000,
+      "image_max_side": 2400
+    }
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "provider": "anthropic",
+  "anthropic_output_mode": "tool",
+  "base_url": "https://coding.dashscope.aliyuncs.com/apps/anthropic",
+  "allow_remote": true,
+  "model": "qwen3.7-plus",
+  "api_key_env": "QWEN_API_KEY",
+  "request_timeout_seconds": 600,
+  "max_tokens": 16000,
+  "image_max_side": 2400,
+  "bom_tile_height": 1200,
+  "projection_tolerance_mm": 3,
+  "angle_tolerance_deg": 0.2,
+  "solver_starts": 5,
+  "solver_max_evaluations": 1500,
+  "audit": true
+}

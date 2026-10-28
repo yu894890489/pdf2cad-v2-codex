@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="zh-CN">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>图纸杆件 · 本地核对</title><link rel="stylesheet" href="style.css"></head>
+<body>
+<header><div><small>LOCAL DRAWING WORKBENCH</small><h1 id="title">图纸杆件 · 本地核对</h1></div><span id="status">正在读取本地数据…</span></header>
+<div id="error" hidden role="alert"></div>
+<main>
+<aside><h2>结构面</h2><select id="face" aria-label="结构面"><option value="all">整体三维</option></select>
+<p id="stats">—</p><div class="controls"><button id="reset">复位视角</button><label><input id="labels" type="checkbox" checked>件号</label></div>
+<h2>杆件实例</h2><input id="search" placeholder="查找件号 / 实例" aria-label="查找件号"><div id="members"></div>
+<div class="downloads"><a id="axes-download" href="candidate_axes.dxf" download>候选轴线 DXF</a><a href="bom.csv" download>BOM 表</a><a href="observations.json" download>识别与装配数据</a><a href="report.json" download>完整校核报告</a></div></aside>
+<section class="workspace"><div class="caption"><span id="view-title">整体三维</span><span>拖动旋转 · 滚轮缩放 · 单击杆件查看</span></div><div class="viewport"><canvas id="model" aria-label="三维杆件模型"></canvas><div class="legend">连接轴线模型 · 单位 mm<br>角钢转角、孔位、切角未建模</div></div>
+<div id="selection">选择杆件查看件号、BOM 下料长度与节点跨度。</div>
+<div id="source-panel" hidden><div class="caption"><strong id="source-title">原图 / 模型投影叠加</strong><label><input id="overlay" type="checkbox" checked>显示叠图</label></div><img id="source" alt="当前结构面的原图及投影对照"></div>
+<section class="report"><h2>逐项校核</h2><div id="metrics"></div><p>投影吻合只证明给定观察与模型一致。仍需核对 BOM、件号、连接节点及翻折方向。</p><ul id="issues"></ul><details><summary>尺寸与投影误差</summary><table><thead><tr><th>类别</th><th>对象</th><th>误差</th><th>容差</th><th>结果</th></tr></thead><tbody id="checks"></tbody></table></details></section>
+</section></main>
+<script src="app.js" defer></script>
+</body></html>

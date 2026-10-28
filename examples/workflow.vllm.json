@@ -1,0 +1,19 @@
+{
+  "schema_version": "1.0",
+  "name": "原生几何与本地视觉复核",
+  "diagnostic_tolerance_mm": 3,
+  "vision_review": {
+    "enabled": true,
+    "max_views": 24,
+    "service": {
+      "provider": "vllm",
+      "base_url": "http://127.0.0.1:8000/v1",
+      "allow_remote": false,
+      "model": "填写本地已部署且支持图像输入的模型名称",
+      "api_key_env": "VLLM_API_KEY",
+      "request_timeout_seconds": 180,
+      "max_tokens": 6000,
+      "image_max_side": 2400
+    }
+  }
+}

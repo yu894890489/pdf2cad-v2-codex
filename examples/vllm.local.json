@@ -1,0 +1,14 @@
+{
+  "base_url": "http://127.0.0.1:8000/v1",
+  "model": "填写本地已部署的视觉模型名称",
+  "api_key_env": "VLLM_API_KEY",
+  "request_timeout_seconds": 180,
+  "max_tokens": 12000,
+  "image_max_side": 2400,
+  "bom_tile_height": 1200,
+  "projection_tolerance_mm": 3,
+  "angle_tolerance_deg": 0.2,
+  "solver_starts": 5,
+  "solver_max_evaluations": 1500,
+  "audit": true
+}

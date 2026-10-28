@@ -1,0 +1,754 @@
+{
+  "$defs": {
+    "Assembly": {
+      "additionalProperties": false,
+      "properties": {
+        "anchor_view": {
+          "title": "Anchor View",
+          "type": "string"
+        },
+        "joints": {
+          "items": {
+            "$ref": "#/$defs/Joint"
+          },
+          "title": "Joints",
+          "type": "array"
+        },
+        "members": {
+          "items": {
+            "$ref": "#/$defs/Member"
+          },
+          "title": "Members",
+          "type": "array"
+        },
+        "placements": {
+          "items": {
+            "$ref": "#/$defs/Placement"
+          },
+          "title": "Placements",
+          "type": "array"
+        },
+        "relations": {
+          "items": {
+            "$ref": "#/$defs/Relation"
+          },
+          "title": "Relations",
+          "type": "array"
+        },
+        "issues": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Issues",
+          "type": "array"
+        }
+      },
+      "required": [
+        "anchor_view",
+        "joints",
+        "members",
+        "placements"
+      ],
+      "title": "Assembly",
+      "type": "object"
+    },
+    "BomRow": {
+      "additionalProperties": false,
+      "properties": {
+        "mark": {
+          "minLength": 1,
+          "title": "Mark",
+          "type": "string"
+        },
+        "specification": {
+          "minLength": 1,
+          "title": "Specification",
+          "type": "string"
+        },
+        "length_mm": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Length Mm"
+        },
+        "quantity": {
+          "exclusiveMinimum": 0,
+          "title": "Quantity",
+          "type": "integer"
+        },
+        "evidence": {
+          "$ref": "#/$defs/Evidence"
+        }
+      },
+      "required": [
+        "mark",
+        "specification",
+        "quantity",
+        "evidence"
+      ],
+      "title": "BomRow",
+      "type": "object"
+    },
+    "Calibration": {
+      "additionalProperties": false,
+      "properties": {
+        "axis": {
+          "enum": [
+            "x",
+            "y",
+            "distance"
+          ],
+          "title": "Axis",
+          "type": "string"
+        },
+        "start": {
+          "maxItems": 2,
+          "minItems": 2,
+          "prefixItems": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "number"
+            }
+          ],
+          "title": "Start",
+          "type": "array"
+        },
+        "end": {
+          "maxItems": 2,
+          "minItems": 2,
+          "prefixItems": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "number"
+            }
+          ],
+          "title": "End",
+          "type": "array"
+        },
+        "length_mm": {
+          "exclusiveMinimum": 0,
+          "title": "Length Mm",
+          "type": "number"
+        },
+        "evidence": {
+          "$ref": "#/$defs/Evidence"
+        }
+      },
+      "required": [
+        "axis",
+        "start",
+        "end",
+        "length_mm",
+        "evidence"
+      ],
+      "title": "Calibration",
+      "type": "object"
+    },
+    "Dimension": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "pattern": "^[A-Za-z0-9_-]+$",
+          "title": "Id",
+          "type": "string"
+        },
+        "a": {
+          "title": "A",
+          "type": "string"
+        },
+        "b": {
+          "title": "B",
+          "type": "string"
+        },
+        "kind": {
+          "enum": [
+            "distance",
+            "x",
+            "y"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "value_mm": {
+          "exclusiveMinimum": 0,
+          "title": "Value Mm",
+          "type": "number"
+        },
+        "tolerance_mm": {
+          "default": 1,
+          "exclusiveMinimum": 0,
+          "maximum": 10,
+          "title": "Tolerance Mm",
+          "type": "number"
+        },
+        "evidence": {
+          "$ref": "#/$defs/Evidence"
+        }
+      },
+      "required": [
+        "id",
+        "a",
+        "b",
+        "kind",
+        "value_mm",
+        "evidence"
+      ],
+      "title": "Dimension",
+      "type": "object"
+    },
+    "EdgeObservation": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "pattern": "^[A-Za-z0-9_-]+$",
+          "title": "Id",
+          "type": "string"
+        },
+        "mark": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Mark"
+        },
+        "a": {
+          "title": "A",
+          "type": "string"
+        },
+        "b": {
+          "title": "B",
+          "type": "string"
+        },
+        "line_style": {
+          "enum": [
+            "solid",
+            "dashed",
+            "reference"
+          ],
+          "title": "Line Style",
+          "type": "string"
+        },
+        "evidence": {
+          "$ref": "#/$defs/Evidence"
+        }
+      },
+      "required": [
+        "id",
+        "a",
+        "b",
+        "line_style",
+        "evidence"
+      ],
+      "title": "EdgeObservation",
+      "type": "object"
+    },
+    "EdgeRef": {
+      "additionalProperties": false,
+      "properties": {
+        "view": {
+          "title": "View",
+          "type": "string"
+        },
+        "edge": {
+          "title": "Edge",
+          "type": "string"
+        }
+      },
+      "required": [
+        "view",
+        "edge"
+      ],
+      "title": "EdgeRef",
+      "type": "object"
+    },
+    "Evidence": {
+      "additionalProperties": false,
+      "properties": {
+        "page": {
+          "minimum": 1,
+          "title": "Page",
+          "type": "integer"
+        },
+        "bbox": {
+          "maxItems": 4,
+          "minItems": 4,
+          "prefixItems": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "number"
+            }
+          ],
+          "title": "Bbox",
+          "type": "array"
+        },
+        "text": {
+          "minLength": 1,
+          "title": "Text",
+          "type": "string"
+        }
+      },
+      "required": [
+        "page",
+        "bbox",
+        "text"
+      ],
+      "title": "Evidence",
+      "type": "object"
+    },
+    "Face": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "pattern": "^[A-Za-z0-9_-]+$",
+          "title": "Id",
+          "type": "string"
+        },
+        "title": {
+          "title": "Title",
+          "type": "string"
+        },
+        "evidence": {
+          "$ref": "#/$defs/Evidence"
+        },
+        "coordinate_units": {
+          "default": "page",
+          "enum": [
+            "page",
+            "mm"
+          ],
+          "title": "Coordinate Units",
+          "type": "string"
+        },
+        "origin": {
+          "maxItems": 2,
+          "minItems": 2,
+          "prefixItems": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "number"
+            }
+          ],
+          "title": "Origin",
+          "type": "array"
+        },
+        "uniform_scale": {
+          "default": false,
+          "title": "Uniform Scale",
+          "type": "boolean"
+        },
+        "calibrations": {
+          "items": {
+            "$ref": "#/$defs/Calibration"
+          },
+          "title": "Calibrations",
+          "type": "array"
+        },
+        "nodes": {
+          "items": {
+            "$ref": "#/$defs/NodeObservation"
+          },
+          "title": "Nodes",
+          "type": "array"
+        },
+        "edges": {
+          "items": {
+            "$ref": "#/$defs/EdgeObservation"
+          },
+          "title": "Edges",
+          "type": "array"
+        },
+        "dimensions": {
+          "items": {
+            "$ref": "#/$defs/Dimension"
+          },
+          "title": "Dimensions",
+          "type": "array"
+        },
+        "issues": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Issues",
+          "type": "array"
+        }
+      },
+      "required": [
+        "id",
+        "title",
+        "evidence",
+        "origin",
+        "nodes",
+        "edges"
+      ],
+      "title": "Face",
+      "type": "object"
+    },
+    "Joint": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "pattern": "^[A-Za-z0-9_-]+$",
+          "title": "Id",
+          "type": "string"
+        },
+        "observations": {
+          "items": {
+            "$ref": "#/$defs/NodeRef"
+          },
+          "minItems": 1,
+          "title": "Observations",
+          "type": "array"
+        },
+        "evidence": {
+          "$ref": "#/$defs/Evidence"
+        }
+      },
+      "required": [
+        "id",
+        "observations",
+        "evidence"
+      ],
+      "title": "Joint",
+      "type": "object"
+    },
+    "Member": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "pattern": "^[A-Za-z0-9_-]+$",
+          "title": "Id",
+          "type": "string"
+        },
+        "mark": {
+          "title": "Mark",
+          "type": "string"
+        },
+        "occurrences": {
+          "items": {
+            "$ref": "#/$defs/EdgeRef"
+          },
+          "minItems": 1,
+          "title": "Occurrences",
+          "type": "array"
+        },
+        "end_offsets_mm": {
+          "anyOf": [
+            {
+              "maxItems": 2,
+              "minItems": 2,
+              "prefixItems": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "number"
+                }
+              ],
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "End Offsets Mm"
+        },
+        "offset_evidence": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Evidence"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "required": [
+        "id",
+        "mark",
+        "occurrences"
+      ],
+      "title": "Member",
+      "type": "object"
+    },
+    "NodeObservation": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "pattern": "^[A-Za-z0-9_-]+$",
+          "title": "Id",
+          "type": "string"
+        },
+        "xy": {
+          "maxItems": 2,
+          "minItems": 2,
+          "prefixItems": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "number"
+            }
+          ],
+          "title": "Xy",
+          "type": "array"
+        },
+        "evidence": {
+          "$ref": "#/$defs/Evidence"
+        }
+      },
+      "required": [
+        "id",
+        "xy",
+        "evidence"
+      ],
+      "title": "NodeObservation",
+      "type": "object"
+    },
+    "NodeRef": {
+      "additionalProperties": false,
+      "properties": {
+        "view": {
+          "title": "View",
+          "type": "string"
+        },
+        "node": {
+          "title": "Node",
+          "type": "string"
+        }
+      },
+      "required": [
+        "view",
+        "node"
+      ],
+      "title": "NodeRef",
+      "type": "object"
+    },
+    "Placement": {
+      "additionalProperties": false,
+      "properties": {
+        "view": {
+          "title": "View",
+          "type": "string"
+        },
+        "origin_guess": {
+          "default": [
+            0,
+            0,
+            0
+          ],
+          "maxItems": 3,
+          "minItems": 3,
+          "prefixItems": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "number"
+            }
+          ],
+          "title": "Origin Guess",
+          "type": "array"
+        },
+        "u_guess": {
+          "default": [
+            1,
+            0,
+            0
+          ],
+          "maxItems": 3,
+          "minItems": 3,
+          "prefixItems": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "number"
+            }
+          ],
+          "title": "U Guess",
+          "type": "array"
+        },
+        "v_guess": {
+          "default": [
+            0,
+            0,
+            1
+          ],
+          "maxItems": 3,
+          "minItems": 3,
+          "prefixItems": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "number"
+            }
+          ],
+          "title": "V Guess",
+          "type": "array"
+        },
+        "fixed_rotation": {
+          "default": false,
+          "title": "Fixed Rotation",
+          "type": "boolean"
+        },
+        "orientation_evidence": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Evidence"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "required": [
+        "view"
+      ],
+      "title": "Placement",
+      "type": "object"
+    },
+    "Relation": {
+      "additionalProperties": false,
+      "properties": {
+        "first": {
+          "title": "First",
+          "type": "string"
+        },
+        "second": {
+          "title": "Second",
+          "type": "string"
+        },
+        "kind": {
+          "enum": [
+            "parallel",
+            "perpendicular"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "evidence": {
+          "$ref": "#/$defs/Evidence"
+        }
+      },
+      "required": [
+        "first",
+        "second",
+        "kind",
+        "evidence"
+      ],
+      "title": "Relation",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": "1.0",
+      "default": "1.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "title": {
+      "title": "Title",
+      "type": "string"
+    },
+    "source_sha256": {
+      "pattern": "^[a-f0-9]{64}$",
+      "title": "Source Sha256",
+      "type": "string"
+    },
+    "page_sizes": {
+      "items": {
+        "maxItems": 2,
+        "minItems": 2,
+        "prefixItems": [
+          {
+            "type": "number"
+          },
+          {
+            "type": "number"
+          }
+        ],
+        "type": "array"
+      },
+      "minItems": 1,
+      "title": "Page Sizes",
+      "type": "array"
+    },
+    "bom": {
+      "items": {
+        "$ref": "#/$defs/BomRow"
+      },
+      "title": "Bom",
+      "type": "array"
+    },
+    "faces": {
+      "items": {
+        "$ref": "#/$defs/Face"
+      },
+      "title": "Faces",
+      "type": "array"
+    },
+    "assembly": {
+      "$ref": "#/$defs/Assembly"
+    },
+    "issues": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Issues",
+      "type": "array"
+    }
+  },
+  "required": [
+    "title",
+    "source_sha256",
+    "page_sizes",
+    "bom",
+    "faces",
+    "assembly"
+  ],
+  "title": "Drawing",
+  "type": "object"
+}

@@ -1,0 +1,17 @@
+.venv/
+__pycache__/
+*.egg-info/
+.pytest_cache/
+runs/
+.env
+/build/
+/tmp/
+/site/
+/图纸/
+/output/*
+!/output/*_VALIDATION.md
+!/output/drawing.schema.json
+*.pdf
+*.dxf
+*.png
+*.csv

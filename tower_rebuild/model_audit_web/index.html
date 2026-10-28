@@ -1,0 +1,9 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>三维尺寸复核</title><link rel="stylesheet" href="style.css"></head>
+<body><header><small>本地图纸工作台 / 模型与初审对照</small><h1>三维尺寸复核</h1><p id="title"></p><nav><a href="../topology/">查看三维与原图</a><a href="../audit/">查看尺寸初审</a><a href="report.json" download>下载完整比对 JSON</a></nav></header>
+<main><div id="error" role="alert" hidden></div><p id="summary" role="status">正在读取模型比对…</p><div id="metrics"></div><p id="tolerance" class="hint"></p>
+<div class="controls"><label>结构面 <select id="view"><option value="">全部结构面</option></select></label><label>搜索件号 / 记录 <input id="search" type="search" placeholder="例如 465"></label></div>
+<section><h2>杆件全长与初审换算</h2><p class="hint">只比较已补齐分段跨度、端部尺寸的下料长度。缺少换算依据的尺寸边保留待定。</p><div class="table"><table><thead><tr><th>结构面 / 件号</th><th>模型全长</th><th>初审换算</th><th>BOM</th><th>模型 − 初审</th><th>公式与结果</th></tr></thead><tbody id="full-lengths"></tbody></table></div></section>
+<section><h2>原初审疑点在模型中的表现</h2><div id="findings"></div></section>
+<section><h2>逐项测量</h2><div class="controls"><label>项目 <select id="kind"><option value="">全部项目</option></select></label><label>结果 <select id="status"><option value="difference">尺寸差异</option><option value="">全部结果</option><option value="within_diagnostic_bound">阈值内相容</option><option value="pending">待定</option><option value="input_reused">输入复用</option><option value="blank_reference">板坯参考</option></select></label><span id="row-count"></span></div><div class="table"><table><thead><tr><th>结构面 / 项目</th><th>模型 mm</th><th>原依据 mm</th><th>差值 mm</th><th>状态</th><th>依据与限制</th></tr></thead><tbody id="rows"></tbody></table></div></section>
+<section><h2>范围与未确定条件</h2><ul id="limitations"></ul></section></main><script src="app.js" defer></script></body></html>

@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="zh-CN">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>本地图纸工作台</title><link rel="stylesheet" href="/style.css"><script src="/app.js" defer></script></head>
+<body>
+<header><div class="brand"><span class="mark">L</span><div><strong>图纸工作台</strong><small>PDF · BOM · 结构拓扑 · 三维 · 终检</small></div></div><span class="local" id="runtime-label"><i></i>仅在本机运行</span></header>
+<main>
+<section class="intro"><p class="eyebrow">输电塔结构图 / 本地解析</p><h1>从新图纸开始</h1><p>上传 PDF，自动整理零件、结构面和尺寸依据。逐面查看三维模型，核对每一处识别疑点。</p></section>
+<div id="error" role="alert" hidden></div>
+<section class="upload-panel" aria-labelledby="upload-title">
+<div id="drop-zone" tabindex="0" role="button" aria-label="选择或拖入 PDF 图纸">
+<div class="upload-icon" aria-hidden="true">↑</div><h2 id="upload-title">拖入图纸，或选择 PDF</h2><p>支持一次选择多张 · 每个文件不超过 100 MB</p><button id="pick" type="button">选择图纸</button>
+</div>
+<input id="files" type="file" accept="application/pdf,.pdf" multiple hidden>
+<div class="upload-detail"><strong>自动处理流程</strong><ol><li>解析图纸与 BOM，保存零件数组</li><li>识别图元、圈号与各结构面</li><li>梳理杆件、板件和孔位的拓扑关系</li><li>尺寸示意图与 BOM 初审</li><li>构建可旋转的逐面三维模型</li><li>图纸与模型比对，汇总全流程终检</li></ol><p class="muted">适用于可提取文字与矢量线条的 PDF。扫描图会明确提示所缺步骤。</p><p id="profile-mode" class="muted"></p></div>
+<div class="selection" id="selection" hidden><ul id="selected-files"></ul><button id="upload" type="button" class="primary">开始处理</button><p id="upload-status" role="status" aria-live="polite"></p><progress id="upload-progress" max="100" value="0" hidden></progress></div>
+</section>
+<section class="history"><div class="section-heading"><div><h2>图纸与处理结果</h2><p id="summary">正在读取本地记录…</p></div><button id="refresh" type="button">刷新记录</button></div><div id="jobs" aria-live="polite"></div></section>
+<footer>Q345L 按角钢处理，Q345- 按板材处理。候选模型保留缺项与冲突；观察次数不等于实物数量，空间装配仍需复核。</footer>
+</main>
+</body></html>

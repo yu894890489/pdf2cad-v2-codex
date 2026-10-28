@@ -1,0 +1,2308 @@
+{
+  "schema_version": "1.0",
+  "title": "合成箱体测试 · 非原图复原",
+  "source_sha256": "5ff207ea8f12764440d73383e2ebaa7efbabe8781dc3024f054ef939a93570fe",
+  "page_sizes": [
+    [
+      1000.0,
+      1000.0
+    ]
+  ],
+  "bom": [
+    {
+      "mark": "101",
+      "specification": "Q345L63×5",
+      "length_mm": 2400.0,
+      "quantity": 4,
+      "evidence": {
+        "page": 1,
+        "bbox": [
+          0.05,
+          0.05,
+          0.95,
+          0.95
+        ],
+        "text": "人工构造的测试数据：101"
+      }
+    },
+    {
+      "mark": "102",
+      "specification": "Q345L63×5",
+      "length_mm": 1200.0,
+      "quantity": 4,
+      "evidence": {
+        "page": 1,
+        "bbox": [
+          0.05,
+          0.05,
+          0.95,
+          0.95
+        ],
+        "text": "人工构造的测试数据：102"
+      }
+    },
+    {
+      "mark": "103",
+      "specification": "Q345L63×5",
+      "length_mm": 1500.0,
+      "quantity": 4,
+      "evidence": {
+        "page": 1,
+        "bbox": [
+          0.05,
+          0.05,
+          0.95,
+          0.95
+        ],
+        "text": "人工构造的测试数据：103"
+      }
+    },
+    {
+      "mark": "104",
+      "specification": "Q345L63×5",
+      "length_mm": 2830.1943396169813,
+      "quantity": 1,
+      "evidence": {
+        "page": 1,
+        "bbox": [
+          0.05,
+          0.05,
+          0.95,
+          0.95
+        ],
+        "text": "人工构造的测试数据：104"
+      }
+    },
+    {
+      "mark": "901",
+      "specification": "Q345-12×643",
+      "length_mm": 885.0,
+      "quantity": 2,
+      "evidence": {
+        "page": 1,
+        "bbox": [
+          0.05,
+          0.05,
+          0.95,
+          0.95
+        ],
+        "text": "人工构造的测试数据：excluded plate"
+      }
+    }
+  ],
+  "faces": [
+    {
+      "id": "front",
+      "title": "正视面",
+      "evidence": {
+        "page": 1,
+        "bbox": [
+          0.05,
+          0.05,
+          0.95,
+          0.95
+        ],
+        "text": "人工构造的测试数据：正视面"
+      },
+      "coordinate_units": "mm",
+      "origin": [
+        0.0,
+        0.0
+      ],
+      "uniform_scale": false,
+      "calibrations": [],
+      "nodes": [
+        {
+          "id": "A",
+          "xy": [
+            0.0,
+            0.0
+          ],
+          "evidence": {
+            "page": 1,
+            "bbox": [
+              0.05,
+              0.05,
+              0.95,
+              0.95
+            ],
+            "text": "人工构造的测试数据：front/A"
+          }
+        },
+        {
+          "id": "B",
+          "xy": [
+            2400.0,
+            0.0
+          ],
+          "evidence": {
+            "page": 1,
+            "bbox": [
+              0.05,
+              0.05,
+              0.95,
+              0.95
+            ],
+            "text": "人工构造的测试数据：front/B"
+          }
+        },
+        {
+          "id": "C",
+          "xy": [
+            2400.0,
+            1500.0
+          ],
+          "evidence": {
+            "page": 1,
+            "bbox": [
+              0.05,
+              0.05,
+              0.95,
+              0.95
+            ],
+            "text": "人工构造的测试数据：front/C"
+          }
+        },
+        {
+          "id": "D",
+          "xy": [
+            0.0,
+            1500.0
+          ],
+          "evidence": {
+            "page": 1,
+            "bbox": [
+              0.05,
+              0.05,
+              0.95,
+              0.95
+            ],
+            "text": "人工构造的测试数据：front/D"
+          }
+        }
+      ],
+      "edges": [
+        {
+          "id": "ab",
+          "mark": "101",
+          "a": "A",
+          "b": "B",
+          "line_style": "solid",
+          "evidence": {
+            "page": 1,
+            "bbox": [
+              0.05,
+              0.05,
+              0.95,
+              0.95
+            ],
+            "text": "人工构造的测试数据：ab"
+          }
+        },
+        {
+          "id": "dc",
+          "mark": "101",
+          "a": "D",
+          "b": "C",
+          "line_style": "solid",
+          "evidence": {
+            "page": 1,
+            "bbox": [
+              0.05,
+              0.05,
+              0.95,
+              0.95
+            ],
+            "text": "人工构造的测试数据：dc"
+          }
+        },
+        {
+          "id": "ad",
+          "mark": "103",
+          "a": "A",
+          "b": "D",
+          "line_style": "solid",
+          "evidence": {
+            "page": 1,
+            "bbox": [
+              0.05,
+              0.05,
+              0.95,
+              0.95
+            ],
+            "text": "人工构造的测试数据：ad"
+          }
+        },
+        {
+          "id": "bc",
+          "mark": "103",
+          "a": "B",
+          "b": "C",
+          "line_style": "solid",
+          "evidence": {
+            "page": 1,
+            "bbox": [
+              0.05,
+              0.05,
+              0.95,
+              0.95
+            ],
+            "text": "人工构造的测试数据：bc"
+          }
+        },
+        {
+          "id": "ac",
+          "mark": "104",
+          "a": "A",
+          "b": "C",
+          "line_style": "solid",
+          "evidence": {
+            "page": 1,
+            "bbox": [
+              0.05,
+              0.05,
+              0.95,
+              0.95
+            ],
+            "text": "人工构造的测试数据：ac"
+          }
+        }
+      ],
+      "dimensions": [
+        {
+          "id": "dim_ab",
+          "a": "A",
+          "b": "B",
+          "kind": "distance",
+          "value_mm": 2400.0,
+          "tolerance_mm": 1.0,
+          "evidence": {
+            "page": 1,
+            "bbox": [
+              0.05,
+              0.05,
+              0.95,
+              0.95
+            ],
+            "text": "人工构造的测试数据：independent known dimension ab"
+          }
+        },
+        {
+          "id": "dim_dc",
+          "a": "D",
+          "b": "C",
+          "kind": "distance",
+          "value_mm": 2400.0,
+          "tolerance_mm": 1.0,
+          "evidence": {
+            "page": 1,
+            "bbox": [
+              0.05,
+              0.05,
+              0.95,
+              0.95
+            ],
+            "text": "人工构造的测试数据：independent known dimension dc"
+          }
+        },
+        {
+          "id": "dim_ad",
+          "a": "A",
+          "b": "D",
+          "kind": "distance",
+          "value_mm": 1500.0,
+          "tolerance_mm": 1.0,
+          "evidence": {
+            "page": 1,
+            "bbox": [
+              0.05,
+              0.05,
+              0.95,
+              0.95
+            ],
+            "text": "人工构造的测试数据：independent known dimension ad"
+          }
+        },
+        {
+          "id": "dim_bc",
+          "a": "B",
+          "b": "C",
+          "kind": "distance",
+          "value_mm": 1500.0,
+          "tolerance_mm": 1.0,
+          "evidence": {
+            "page": 1,
+            "bbox": [
+              0.05,
+              0.05,
+              0.95,
+              0.95
+            ],
+            "text": "人工构造的测试数据：independent known dimension bc"
+          }
+        },
+        {
+          "id": "dim_ac",
+          "a": "A",
+          "b": "C",
+          "kind": "distance",
+          "value_mm": 2830.1943396169813,
+          "tolerance_mm": 1.0,
+          "evidence": {
+            "page": 1,
+            "bbox": [
+              0.05,
+              0.05,
+              0.95,
+              0.95
+            ],
+            "text": "人工构造的测试数据：independent known dimension ac"
+          }
+        }
+      ],
+      "issues": []
+    },
+    {
+      "id": "rear",
+      "title": "背面",
+      "evidence": {
+        "page": 1,
+        "bbox": [
+          0.05,
+          0.05,
+          0.95,
+          0.95
+        ],
+        "text": "人工构造的测试数据：背面"
+      },
+      "coordinate_units": "mm",
+      "origin": [
+        0.0,
+        0.0
+      ],
+      "uniform_scale": false,
+      "calibrations": [],
+      "nodes": [
+        {
+          "id": "E",
+          "xy": [
+            0.0,
+            0.0
+          ],
+          "evidence": {
+            "page": 1,
+            "bbox": [
+              0.05,
+              0.05,
+              0.95,
+              0.95
+            ],
+            "text": "人工构造的测试数据：rear/E"
+          }
+        },
+        {
+          "id": "F",
+          "xy": [
+            2400.0,
+            0.0
+          ],
+          "evidence": {
+            "page": 1,
+            "bbox": [
+              0.05,
+              0.05,
+              0.95,
+              0.95
+            ],
+            "text": "人工构造的测试数据：rear/F"
+          }
+        },
+        {
+          "id": "G",
+          "xy": [
+            2400.0,
+            1500.0
+          ],
+          "evidence": {
+            "page": 1,
+            "bbox": [
+              0.05,
+              0.05,
+              0.95,
+              0.95
+            ],
+            "text": "人工构造的测试数据：rear/G"
+          }
+        },
+        {
+          "id": "H",
+          "xy": [
+            0.0,
+            1500.0
+          ],
+          "evidence": {
+            "page": 1,
+            "bbox": [
+              0.05,
+              0.05,
+              0.95,
+              0.95
+            ],
+            "text": "人工构造的测试数据：rear/H"
+          }
+        }
+      ],
+      "edges": [
+        {
+          "id": "ef",
+          "mark": "101",
+          "a": "E",
+          "b": "F",
+          "line_style": "solid",
+          "evidence": {
+            "page": 1,
+            "bbox": [
+              0.05,
+              0.05,
+              0.95,
+              0.95
+            ],
+            "text": "人工构造的测试数据：ef"
+          }
+        },
+        {
+          "id": "hg",
+          "mark": "101",
+          "a": "H",
+          "b": "G",
+          "line_style": "solid",
+          "evidence": {
+            "page": 1,
+            "bbox": [
+              0.05,
+              0.05,
+              0.95,
+              0.95
+            ],
+            "text": "人工构造的测试数据：hg"
+          }
+        },
+        {
+          "id": "eh",
+          "mark": "103",
+          "a": "E",
+          "b": "H",
+          "line_style": "solid",
+          "evidence": {
+            "page": 1,
+            "bbox": [
+              0.05,
+              0.05,
+              0.95,
+              0.95
+            ],
+            "text": "人工构造的测试数据：eh"
+          }
+        },
+        {
+          "id": "fg",
+          "mark": "103",
+          "a": "F",
+          "b": "G",
+          "line_style": "solid",
+          "evidence": {
+            "page": 1,
+            "bbox": [
+              0.05,
+              0.05,
+              0.95,
+              0.95
+            ],
+            "text": "人工构造的测试数据：fg"
+          }
+        }
+      ],
+      "dimensions": [
+        {
+          "id": "dim_ef",
+          "a": "E",
+          "b": "F",
+          "kind": "distance",
+          "value_mm": 2400.0,
+          "tolerance_mm": 1.0,
+          "evidence": {
+            "page": 1,
+            "bbox": [
+              0.05,
+              0.05,
+              0.95,
+              0.95
+            ],
+            "text": "人工构造的测试数据：independent known dimension ef"
+          }
+        },
+        {
+          "id": "dim_hg",
+          "a": "H",
+          "b": "G",
+          "kind": "distance",
+          "value_mm": 2400.0,
+          "tolerance_mm": 1.0,
+          "evidence": {
+            "page": 1,
+            "bbox": [
+              0.05,
+              0.05,
+              0.95,
+              0.95
+            ],
+            "text": "人工构造的测试数据：independent known dimension hg"
+          }
+        },
+        {
+          "id": "dim_eh",
+          "a": "E",
+          "b": "H",
+          "kind": "distance",
+          "value_mm": 1500.0,
+          "tolerance_mm": 1.0,
+          "evidence": {
+            "page": 1,
+            "bbox": [
+              0.05,
+              0.05,
+              0.95,
+              0.95
+            ],
+            "text": "人工构造的测试数据：independent known dimension eh"
+          }
+        },
+        {
+          "id": "dim_fg",
+          "a": "F",
+          "b": "G",
+          "kind": "distance",
+          "value_mm": 1500.0,
+          "tolerance_mm": 1.0,
+          "evidence": {
+            "page": 1,
+            "bbox": [
+              0.05,
+              0.05,
+              0.95,
+              0.95
+            ],
+            "text": "人工构造的测试数据：independent known dimension fg"
+          }
+        }
+      ],
+      "issues": []
+    },
+    {
+      "id": "top",
+      "title": "上面",
+      "evidence": {
+        "page": 1,
+        "bbox": [
+          0.05,
+          0.05,
+          0.95,
+          0.95
+        ],
+        "text": "人工构造的测试数据：上面"
+      },
+      "coordinate_units": "mm",
+      "origin": [
+        0.0,
+        0.0
+      ],
+      "uniform_scale": false,
+      "calibrations": [],
+      "nodes": [
+        {
+          "id": "D",
+          "xy": [
+            0.0,
+            0.0
+          ],
+          "evidence": {
+            "page": 1,
+            "bbox": [
+              0.05,
+              0.05,
+              0.95,
+              0.95
+            ],
+            "text": "人工构造的测试数据：top/D"
+          }
+        },
+        {
+          "id": "C",
+          "xy": [
+            2400.0,
+            0.0
+          ],
+          "evidence": {
+            "page": 1,
+            "bbox": [
+              0.05,
+              0.05,
+              0.95,
+              0.95
+            ],
+            "text": "人工构造的测试数据：top/C"
+          }
+        },
+        {
+          "id": "G",
+          "xy": [
+            2400.0,
+            1200.0
+          ],
+          "evidence": {
+            "page": 1,
+            "bbox": [
+              0.05,
+              0.05,
+              0.95,
+              0.95
+            ],
+            "text": "人工构造的测试数据：top/G"
+          }
+        },
+        {
+          "id": "H",
+          "xy": [
+            0.0,
+            1200.0
+          ],
+          "evidence": {
+            "page": 1,
+            "bbox": [
+              0.05,
+              0.05,
+              0.95,
+              0.95
+            ],
+            "text": "人工构造的测试数据：top/H"
+          }
+        }
+      ],
+      "edges": [
+        {
+          "id": "dc",
+          "mark": "101",
+          "a": "D",
+          "b": "C",
+          "line_style": "solid",
+          "evidence": {
+            "page": 1,
+            "bbox": [
+              0.05,
+              0.05,
+              0.95,
+              0.95
+            ],
+            "text": "人工构造的测试数据：dc"
+          }
+        },
+        {
+          "id": "hg",
+          "mark": "101",
+          "a": "H",
+          "b": "G",
+          "line_style": "solid",
+          "evidence": {
+            "page": 1,
+            "bbox": [
+              0.05,
+              0.05,
+              0.95,
+              0.95
+            ],
+            "text": "人工构造的测试数据：hg"
+          }
+        },
+        {
+          "id": "cg",
+          "mark": "102",
+          "a": "C",
+          "b": "G",
+          "line_style": "solid",
+          "evidence": {
+            "page": 1,
+            "bbox": [
+              0.05,
+              0.05,
+              0.95,
+              0.95
+            ],
+            "text": "人工构造的测试数据：cg"
+          }
+        },
+        {
+          "id": "dh",
+          "mark": "102",
+          "a": "D",
+          "b": "H",
+          "line_style": "solid",
+          "evidence": {
+            "page": 1,
+            "bbox": [
+              0.05,
+              0.05,
+              0.95,
+              0.95
+            ],
+            "text": "人工构造的测试数据：dh"
+          }
+        }
+      ],
+      "dimensions": [
+        {
+          "id": "dim_dc",
+          "a": "D",
+          "b": "C",
+          "kind": "distance",
+          "value_mm": 2400.0,
+          "tolerance_mm": 1.0,
+          "evidence": {
+            "page": 1,
+            "bbox": [
+              0.05,
+              0.05,
+              0.95,
+              0.95
+            ],
+            "text": "人工构造的测试数据：independent known dimension dc"
+          }
+        },
+        {
+          "id": "dim_hg",
+          "a": "H",
+          "b": "G",
+          "kind": "distance",
+          "value_mm": 2400.0,
+          "tolerance_mm": 1.0,
+          "evidence": {
+            "page": 1,
+            "bbox": [
+              0.05,
+              0.05,
+              0.95,
+              0.95
+            ],
+            "text": "人工构造的测试数据：independent known dimension hg"
+          }
+        },
+        {
+          "id": "dim_cg",
+          "a": "C",
+          "b": "G",
+          "kind": "distance",
+          "value_mm": 1200.0,
+          "tolerance_mm": 1.0,
+          "evidence": {
+            "page": 1,
+            "bbox": [
+              0.05,
+              0.05,
+              0.95,
+              0.95
+            ],
+            "text": "人工构造的测试数据：independent known dimension cg"
+          }
+        },
+        {
+          "id": "dim_dh",
+          "a": "D",
+          "b": "H",
+          "kind": "distance",
+          "value_mm": 1200.0,
+          "tolerance_mm": 1.0,
+          "evidence": {
+            "page": 1,
+            "bbox": [
+              0.05,
+              0.05,
+              0.95,
+              0.95
+            ],
+            "text": "人工构造的测试数据：independent known dimension dh"
+          }
+        }
+      ],
+      "issues": []
+    },
+    {
+      "id": "bottom",
+      "title": "底面",
+      "evidence": {
+        "page": 1,
+        "bbox": [
+          0.05,
+          0.05,
+          0.95,
+          0.95
+        ],
+        "text": "人工构造的测试数据：底面"
+      },
+      "coordinate_units": "mm",
+      "origin": [
+        0.0,
+        0.0
+      ],
+      "uniform_scale": false,
+      "calibrations": [],
+      "nodes": [
+        {
+          "id": "A",
+          "xy": [
+            0.0,
+            0.0
+          ],
+          "evidence": {
+            "page": 1,
+            "bbox": [
+              0.05,
+              0.05,
+              0.95,
+              0.95
+            ],
+            "text": "人工构造的测试数据：bottom/A"
+          }
+        },
+        {
+          "id": "B",
+          "xy": [
+            2400.0,
+            0.0
+          ],
+          "evidence": {
+            "page": 1,
+            "bbox": [
+              0.05,
+              0.05,
+              0.95,
+              0.95
+            ],
+            "text": "人工构造的测试数据：bottom/B"
+          }
+        },
+        {
+          "id": "F",
+          "xy": [
+            2400.0,
+            1200.0
+          ],
+          "evidence": {
+            "page": 1,
+            "bbox": [
+              0.05,
+              0.05,
+              0.95,
+              0.95
+            ],
+            "text": "人工构造的测试数据：bottom/F"
+          }
+        },
+        {
+          "id": "E",
+          "xy": [
+            0.0,
+            1200.0
+          ],
+          "evidence": {
+            "page": 1,
+            "bbox": [
+              0.05,
+              0.05,
+              0.95,
+              0.95
+            ],
+            "text": "人工构造的测试数据：bottom/E"
+          }
+        }
+      ],
+      "edges": [
+        {
+          "id": "ab",
+          "mark": "101",
+          "a": "A",
+          "b": "B",
+          "line_style": "solid",
+          "evidence": {
+            "page": 1,
+            "bbox": [
+              0.05,
+              0.05,
+              0.95,
+              0.95
+            ],
+            "text": "人工构造的测试数据：ab"
+          }
+        },
+        {
+          "id": "ef",
+          "mark": "101",
+          "a": "E",
+          "b": "F",
+          "line_style": "solid",
+          "evidence": {
+            "page": 1,
+            "bbox": [
+              0.05,
+              0.05,
+              0.95,
+              0.95
+            ],
+            "text": "人工构造的测试数据：ef"
+          }
+        },
+        {
+          "id": "ae",
+          "mark": "102",
+          "a": "A",
+          "b": "E",
+          "line_style": "solid",
+          "evidence": {
+            "page": 1,
+            "bbox": [
+              0.05,
+              0.05,
+              0.95,
+              0.95
+            ],
+            "text": "人工构造的测试数据：ae"
+          }
+        },
+        {
+          "id": "bf",
+          "mark": "102",
+          "a": "B",
+          "b": "F",
+          "line_style": "solid",
+          "evidence": {
+            "page": 1,
+            "bbox": [
+              0.05,
+              0.05,
+              0.95,
+              0.95
+            ],
+            "text": "人工构造的测试数据：bf"
+          }
+        }
+      ],
+      "dimensions": [
+        {
+          "id": "dim_ab",
+          "a": "A",
+          "b": "B",
+          "kind": "distance",
+          "value_mm": 2400.0,
+          "tolerance_mm": 1.0,
+          "evidence": {
+            "page": 1,
+            "bbox": [
+              0.05,
+              0.05,
+              0.95,
+              0.95
+            ],
+            "text": "人工构造的测试数据：independent known dimension ab"
+          }
+        },
+        {
+          "id": "dim_ef",
+          "a": "E",
+          "b": "F",
+          "kind": "distance",
+          "value_mm": 2400.0,
+          "tolerance_mm": 1.0,
+          "evidence": {
+            "page": 1,
+            "bbox": [
+              0.05,
+              0.05,
+              0.95,
+              0.95
+            ],
+            "text": "人工构造的测试数据：independent known dimension ef"
+          }
+        },
+        {
+          "id": "dim_ae",
+          "a": "A",
+          "b": "E",
+          "kind": "distance",
+          "value_mm": 1200.0,
+          "tolerance_mm": 1.0,
+          "evidence": {
+            "page": 1,
+            "bbox": [
+              0.05,
+              0.05,
+              0.95,
+              0.95
+            ],
+            "text": "人工构造的测试数据：independent known dimension ae"
+          }
+        },
+        {
+          "id": "dim_bf",
+          "a": "B",
+          "b": "F",
+          "kind": "distance",
+          "value_mm": 1200.0,
+          "tolerance_mm": 1.0,
+          "evidence": {
+            "page": 1,
+            "bbox": [
+              0.05,
+              0.05,
+              0.95,
+              0.95
+            ],
+            "text": "人工构造的测试数据：independent known dimension bf"
+          }
+        }
+      ],
+      "issues": []
+    },
+    {
+      "id": "left",
+      "title": "左端面",
+      "evidence": {
+        "page": 1,
+        "bbox": [
+          0.05,
+          0.05,
+          0.95,
+          0.95
+        ],
+        "text": "人工构造的测试数据：左端面"
+      },
+      "coordinate_units": "mm",
+      "origin": [
+        0.0,
+        0.0
+      ],
+      "uniform_scale": false,
+      "calibrations": [],
+      "nodes": [
+        {
+          "id": "A",
+          "xy": [
+            0.0,
+            0.0
+          ],
+          "evidence": {
+            "page": 1,
+            "bbox": [
+              0.05,
+              0.05,
+              0.95,
+              0.95
+            ],
+            "text": "人工构造的测试数据：left/A"
+          }
+        },
+        {
+          "id": "E",
+          "xy": [
+            1200.0,
+            0.0
+          ],
+          "evidence": {
+            "page": 1,
+            "bbox": [
+              0.05,
+              0.05,
+              0.95,
+              0.95
+            ],
+            "text": "人工构造的测试数据：left/E"
+          }
+        },
+        {
+          "id": "H",
+          "xy": [
+            1200.0,
+            1500.0
+          ],
+          "evidence": {
+            "page": 1,
+            "bbox": [
+              0.05,
+              0.05,
+              0.95,
+              0.95
+            ],
+            "text": "人工构造的测试数据：left/H"
+          }
+        },
+        {
+          "id": "D",
+          "xy": [
+            0.0,
+            1500.0
+          ],
+          "evidence": {
+            "page": 1,
+            "bbox": [
+              0.05,
+              0.05,
+              0.95,
+              0.95
+            ],
+            "text": "人工构造的测试数据：left/D"
+          }
+        }
+      ],
+      "edges": [
+        {
+          "id": "ae",
+          "mark": "102",
+          "a": "A",
+          "b": "E",
+          "line_style": "solid",
+          "evidence": {
+            "page": 1,
+            "bbox": [
+              0.05,
+              0.05,
+              0.95,
+              0.95
+            ],
+            "text": "人工构造的测试数据：ae"
+          }
+        },
+        {
+          "id": "dh",
+          "mark": "102",
+          "a": "D",
+          "b": "H",
+          "line_style": "solid",
+          "evidence": {
+            "page": 1,
+            "bbox": [
+              0.05,
+              0.05,
+              0.95,
+              0.95
+            ],
+            "text": "人工构造的测试数据：dh"
+          }
+        },
+        {
+          "id": "ad",
+          "mark": "103",
+          "a": "A",
+          "b": "D",
+          "line_style": "solid",
+          "evidence": {
+            "page": 1,
+            "bbox": [
+              0.05,
+              0.05,
+              0.95,
+              0.95
+            ],
+            "text": "人工构造的测试数据：ad"
+          }
+        },
+        {
+          "id": "eh",
+          "mark": "103",
+          "a": "E",
+          "b": "H",
+          "line_style": "solid",
+          "evidence": {
+            "page": 1,
+            "bbox": [
+              0.05,
+              0.05,
+              0.95,
+              0.95
+            ],
+            "text": "人工构造的测试数据：eh"
+          }
+        }
+      ],
+      "dimensions": [
+        {
+          "id": "dim_ae",
+          "a": "A",
+          "b": "E",
+          "kind": "distance",
+          "value_mm": 1200.0,
+          "tolerance_mm": 1.0,
+          "evidence": {
+            "page": 1,
+            "bbox": [
+              0.05,
+              0.05,
+              0.95,
+              0.95
+            ],
+            "text": "人工构造的测试数据：independent known dimension ae"
+          }
+        },
+        {
+          "id": "dim_dh",
+          "a": "D",
+          "b": "H",
+          "kind": "distance",
+          "value_mm": 1200.0,
+          "tolerance_mm": 1.0,
+          "evidence": {
+            "page": 1,
+            "bbox": [
+              0.05,
+              0.05,
+              0.95,
+              0.95
+            ],
+            "text": "人工构造的测试数据：independent known dimension dh"
+          }
+        },
+        {
+          "id": "dim_ad",
+          "a": "A",
+          "b": "D",
+          "kind": "distance",
+          "value_mm": 1500.0,
+          "tolerance_mm": 1.0,
+          "evidence": {
+            "page": 1,
+            "bbox": [
+              0.05,
+              0.05,
+              0.95,
+              0.95
+            ],
+            "text": "人工构造的测试数据：independent known dimension ad"
+          }
+        },
+        {
+          "id": "dim_eh",
+          "a": "E",
+          "b": "H",
+          "kind": "distance",
+          "value_mm": 1500.0,
+          "tolerance_mm": 1.0,
+          "evidence": {
+            "page": 1,
+            "bbox": [
+              0.05,
+              0.05,
+              0.95,
+              0.95
+            ],
+            "text": "人工构造的测试数据：independent known dimension eh"
+          }
+        }
+      ],
+      "issues": []
+    },
+    {
+      "id": "right",
+      "title": "右端面",
+      "evidence": {
+        "page": 1,
+        "bbox": [
+          0.05,
+          0.05,
+          0.95,
+          0.95
+        ],
+        "text": "人工构造的测试数据：右端面"
+      },
+      "coordinate_units": "mm",
+      "origin": [
+        0.0,
+        0.0
+      ],
+      "uniform_scale": false,
+      "calibrations": [],
+      "nodes": [
+        {
+          "id": "B",
+          "xy": [
+            0.0,
+            0.0
+          ],
+          "evidence": {
+            "page": 1,
+            "bbox": [
+              0.05,
+              0.05,
+              0.95,
+              0.95
+            ],
+            "text": "人工构造的测试数据：right/B"
+          }
+        },
+        {
+          "id": "F",
+          "xy": [
+            1200.0,
+            0.0
+          ],
+          "evidence": {
+            "page": 1,
+            "bbox": [
+              0.05,
+              0.05,
+              0.95,
+              0.95
+            ],
+            "text": "人工构造的测试数据：right/F"
+          }
+        },
+        {
+          "id": "G",
+          "xy": [
+            1200.0,
+            1500.0
+          ],
+          "evidence": {
+            "page": 1,
+            "bbox": [
+              0.05,
+              0.05,
+              0.95,
+              0.95
+            ],
+            "text": "人工构造的测试数据：right/G"
+          }
+        },
+        {
+          "id": "C",
+          "xy": [
+            0.0,
+            1500.0
+          ],
+          "evidence": {
+            "page": 1,
+            "bbox": [
+              0.05,
+              0.05,
+              0.95,
+              0.95
+            ],
+            "text": "人工构造的测试数据：right/C"
+          }
+        }
+      ],
+      "edges": [
+        {
+          "id": "bf",
+          "mark": "102",
+          "a": "B",
+          "b": "F",
+          "line_style": "solid",
+          "evidence": {
+            "page": 1,
+            "bbox": [
+              0.05,
+              0.05,
+              0.95,
+              0.95
+            ],
+            "text": "人工构造的测试数据：bf"
+          }
+        },
+        {
+          "id": "cg",
+          "mark": "102",
+          "a": "C",
+          "b": "G",
+          "line_style": "solid",
+          "evidence": {
+            "page": 1,
+            "bbox": [
+              0.05,
+              0.05,
+              0.95,
+              0.95
+            ],
+            "text": "人工构造的测试数据：cg"
+          }
+        },
+        {
+          "id": "bc",
+          "mark": "103",
+          "a": "B",
+          "b": "C",
+          "line_style": "solid",
+          "evidence": {
+            "page": 1,
+            "bbox": [
+              0.05,
+              0.05,
+              0.95,
+              0.95
+            ],
+            "text": "人工构造的测试数据：bc"
+          }
+        },
+        {
+          "id": "fg",
+          "mark": "103",
+          "a": "F",
+          "b": "G",
+          "line_style": "solid",
+          "evidence": {
+            "page": 1,
+            "bbox": [
+              0.05,
+              0.05,
+              0.95,
+              0.95
+            ],
+            "text": "人工构造的测试数据：fg"
+          }
+        }
+      ],
+      "dimensions": [
+        {
+          "id": "dim_bf",
+          "a": "B",
+          "b": "F",
+          "kind": "distance",
+          "value_mm": 1200.0,
+          "tolerance_mm": 1.0,
+          "evidence": {
+            "page": 1,
+            "bbox": [
+              0.05,
+              0.05,
+              0.95,
+              0.95
+            ],
+            "text": "人工构造的测试数据：independent known dimension bf"
+          }
+        },
+        {
+          "id": "dim_cg",
+          "a": "C",
+          "b": "G",
+          "kind": "distance",
+          "value_mm": 1200.0,
+          "tolerance_mm": 1.0,
+          "evidence": {
+            "page": 1,
+            "bbox": [
+              0.05,
+              0.05,
+              0.95,
+              0.95
+            ],
+            "text": "人工构造的测试数据：independent known dimension cg"
+          }
+        },
+        {
+          "id": "dim_bc",
+          "a": "B",
+          "b": "C",
+          "kind": "distance",
+          "value_mm": 1500.0,
+          "tolerance_mm": 1.0,
+          "evidence": {
+            "page": 1,
+            "bbox": [
+              0.05,
+              0.05,
+              0.95,
+              0.95
+            ],
+            "text": "人工构造的测试数据：independent known dimension bc"
+          }
+        },
+        {
+          "id": "dim_fg",
+          "a": "F",
+          "b": "G",
+          "kind": "distance",
+          "value_mm": 1500.0,
+          "tolerance_mm": 1.0,
+          "evidence": {
+            "page": 1,
+            "bbox": [
+              0.05,
+              0.05,
+              0.95,
+              0.95
+            ],
+            "text": "人工构造的测试数据：independent known dimension fg"
+          }
+        }
+      ],
+      "issues": []
+    }
+  ],
+  "assembly": {
+    "anchor_view": "front",
+    "joints": [
+      {
+        "id": "A",
+        "observations": [
+          {
+            "view": "front",
+            "node": "A"
+          },
+          {
+            "view": "bottom",
+            "node": "A"
+          },
+          {
+            "view": "left",
+            "node": "A"
+          }
+        ],
+        "evidence": {
+          "page": 1,
+          "bbox": [
+            0.05,
+            0.05,
+            0.95,
+            0.95
+          ],
+          "text": "人工构造的测试数据：A"
+        }
+      },
+      {
+        "id": "B",
+        "observations": [
+          {
+            "view": "front",
+            "node": "B"
+          },
+          {
+            "view": "bottom",
+            "node": "B"
+          },
+          {
+            "view": "right",
+            "node": "B"
+          }
+        ],
+        "evidence": {
+          "page": 1,
+          "bbox": [
+            0.05,
+            0.05,
+            0.95,
+            0.95
+          ],
+          "text": "人工构造的测试数据：B"
+        }
+      },
+      {
+        "id": "C",
+        "observations": [
+          {
+            "view": "front",
+            "node": "C"
+          },
+          {
+            "view": "top",
+            "node": "C"
+          },
+          {
+            "view": "right",
+            "node": "C"
+          }
+        ],
+        "evidence": {
+          "page": 1,
+          "bbox": [
+            0.05,
+            0.05,
+            0.95,
+            0.95
+          ],
+          "text": "人工构造的测试数据：C"
+        }
+      },
+      {
+        "id": "D",
+        "observations": [
+          {
+            "view": "front",
+            "node": "D"
+          },
+          {
+            "view": "top",
+            "node": "D"
+          },
+          {
+            "view": "left",
+            "node": "D"
+          }
+        ],
+        "evidence": {
+          "page": 1,
+          "bbox": [
+            0.05,
+            0.05,
+            0.95,
+            0.95
+          ],
+          "text": "人工构造的测试数据：D"
+        }
+      },
+      {
+        "id": "E",
+        "observations": [
+          {
+            "view": "rear",
+            "node": "E"
+          },
+          {
+            "view": "bottom",
+            "node": "E"
+          },
+          {
+            "view": "left",
+            "node": "E"
+          }
+        ],
+        "evidence": {
+          "page": 1,
+          "bbox": [
+            0.05,
+            0.05,
+            0.95,
+            0.95
+          ],
+          "text": "人工构造的测试数据：E"
+        }
+      },
+      {
+        "id": "F",
+        "observations": [
+          {
+            "view": "rear",
+            "node": "F"
+          },
+          {
+            "view": "bottom",
+            "node": "F"
+          },
+          {
+            "view": "right",
+            "node": "F"
+          }
+        ],
+        "evidence": {
+          "page": 1,
+          "bbox": [
+            0.05,
+            0.05,
+            0.95,
+            0.95
+          ],
+          "text": "人工构造的测试数据：F"
+        }
+      },
+      {
+        "id": "G",
+        "observations": [
+          {
+            "view": "rear",
+            "node": "G"
+          },
+          {
+            "view": "top",
+            "node": "G"
+          },
+          {
+            "view": "right",
+            "node": "G"
+          }
+        ],
+        "evidence": {
+          "page": 1,
+          "bbox": [
+            0.05,
+            0.05,
+            0.95,
+            0.95
+          ],
+          "text": "人工构造的测试数据：G"
+        }
+      },
+      {
+        "id": "H",
+        "observations": [
+          {
+            "view": "rear",
+            "node": "H"
+          },
+          {
+            "view": "top",
+            "node": "H"
+          },
+          {
+            "view": "left",
+            "node": "H"
+          }
+        ],
+        "evidence": {
+          "page": 1,
+          "bbox": [
+            0.05,
+            0.05,
+            0.95,
+            0.95
+          ],
+          "text": "人工构造的测试数据：H"
+        }
+      }
+    ],
+    "members": [
+      {
+        "id": "ab",
+        "mark": "101",
+        "occurrences": [
+          {
+            "view": "front",
+            "edge": "ab"
+          },
+          {
+            "view": "bottom",
+            "edge": "ab"
+          }
+        ],
+        "end_offsets_mm": [
+          0.0,
+          0.0
+        ],
+        "offset_evidence": {
+          "page": 1,
+          "bbox": [
+            0.05,
+            0.05,
+            0.95,
+            0.95
+          ],
+          "text": "人工构造的测试数据：synthetic joint-to-joint length equals cut length"
+        }
+      },
+      {
+        "id": "dc",
+        "mark": "101",
+        "occurrences": [
+          {
+            "view": "front",
+            "edge": "dc"
+          },
+          {
+            "view": "top",
+            "edge": "dc"
+          }
+        ],
+        "end_offsets_mm": [
+          0.0,
+          0.0
+        ],
+        "offset_evidence": {
+          "page": 1,
+          "bbox": [
+            0.05,
+            0.05,
+            0.95,
+            0.95
+          ],
+          "text": "人工构造的测试数据：synthetic joint-to-joint length equals cut length"
+        }
+      },
+      {
+        "id": "ef",
+        "mark": "101",
+        "occurrences": [
+          {
+            "view": "rear",
+            "edge": "ef"
+          },
+          {
+            "view": "bottom",
+            "edge": "ef"
+          }
+        ],
+        "end_offsets_mm": [
+          0.0,
+          0.0
+        ],
+        "offset_evidence": {
+          "page": 1,
+          "bbox": [
+            0.05,
+            0.05,
+            0.95,
+            0.95
+          ],
+          "text": "人工构造的测试数据：synthetic joint-to-joint length equals cut length"
+        }
+      },
+      {
+        "id": "hg",
+        "mark": "101",
+        "occurrences": [
+          {
+            "view": "rear",
+            "edge": "hg"
+          },
+          {
+            "view": "top",
+            "edge": "hg"
+          }
+        ],
+        "end_offsets_mm": [
+          0.0,
+          0.0
+        ],
+        "offset_evidence": {
+          "page": 1,
+          "bbox": [
+            0.05,
+            0.05,
+            0.95,
+            0.95
+          ],
+          "text": "人工构造的测试数据：synthetic joint-to-joint length equals cut length"
+        }
+      },
+      {
+        "id": "ae",
+        "mark": "102",
+        "occurrences": [
+          {
+            "view": "bottom",
+            "edge": "ae"
+          },
+          {
+            "view": "left",
+            "edge": "ae"
+          }
+        ],
+        "end_offsets_mm": [
+          0.0,
+          0.0
+        ],
+        "offset_evidence": {
+          "page": 1,
+          "bbox": [
+            0.05,
+            0.05,
+            0.95,
+            0.95
+          ],
+          "text": "人工构造的测试数据：synthetic joint-to-joint length equals cut length"
+        }
+      },
+      {
+        "id": "bf",
+        "mark": "102",
+        "occurrences": [
+          {
+            "view": "bottom",
+            "edge": "bf"
+          },
+          {
+            "view": "right",
+            "edge": "bf"
+          }
+        ],
+        "end_offsets_mm": [
+          0.0,
+          0.0
+        ],
+        "offset_evidence": {
+          "page": 1,
+          "bbox": [
+            0.05,
+            0.05,
+            0.95,
+            0.95
+          ],
+          "text": "人工构造的测试数据：synthetic joint-to-joint length equals cut length"
+        }
+      },
+      {
+        "id": "cg",
+        "mark": "102",
+        "occurrences": [
+          {
+            "view": "top",
+            "edge": "cg"
+          },
+          {
+            "view": "right",
+            "edge": "cg"
+          }
+        ],
+        "end_offsets_mm": [
+          0.0,
+          0.0
+        ],
+        "offset_evidence": {
+          "page": 1,
+          "bbox": [
+            0.05,
+            0.05,
+            0.95,
+            0.95
+          ],
+          "text": "人工构造的测试数据：synthetic joint-to-joint length equals cut length"
+        }
+      },
+      {
+        "id": "dh",
+        "mark": "102",
+        "occurrences": [
+          {
+            "view": "top",
+            "edge": "dh"
+          },
+          {
+            "view": "left",
+            "edge": "dh"
+          }
+        ],
+        "end_offsets_mm": [
+          0.0,
+          0.0
+        ],
+        "offset_evidence": {
+          "page": 1,
+          "bbox": [
+            0.05,
+            0.05,
+            0.95,
+            0.95
+          ],
+          "text": "人工构造的测试数据：synthetic joint-to-joint length equals cut length"
+        }
+      },
+      {
+        "id": "ad",
+        "mark": "103",
+        "occurrences": [
+          {
+            "view": "front",
+            "edge": "ad"
+          },
+          {
+            "view": "left",
+            "edge": "ad"
+          }
+        ],
+        "end_offsets_mm": [
+          0.0,
+          0.0
+        ],
+        "offset_evidence": {
+          "page": 1,
+          "bbox": [
+            0.05,
+            0.05,
+            0.95,
+            0.95
+          ],
+          "text": "人工构造的测试数据：synthetic joint-to-joint length equals cut length"
+        }
+      },
+      {
+        "id": "bc",
+        "mark": "103",
+        "occurrences": [
+          {
+            "view": "front",
+            "edge": "bc"
+          },
+          {
+            "view": "right",
+            "edge": "bc"
+          }
+        ],
+        "end_offsets_mm": [
+          0.0,
+          0.0
+        ],
+        "offset_evidence": {
+          "page": 1,
+          "bbox": [
+            0.05,
+            0.05,
+            0.95,
+            0.95
+          ],
+          "text": "人工构造的测试数据：synthetic joint-to-joint length equals cut length"
+        }
+      },
+      {
+        "id": "eh",
+        "mark": "103",
+        "occurrences": [
+          {
+            "view": "rear",
+            "edge": "eh"
+          },
+          {
+            "view": "left",
+            "edge": "eh"
+          }
+        ],
+        "end_offsets_mm": [
+          0.0,
+          0.0
+        ],
+        "offset_evidence": {
+          "page": 1,
+          "bbox": [
+            0.05,
+            0.05,
+            0.95,
+            0.95
+          ],
+          "text": "人工构造的测试数据：synthetic joint-to-joint length equals cut length"
+        }
+      },
+      {
+        "id": "fg",
+        "mark": "103",
+        "occurrences": [
+          {
+            "view": "rear",
+            "edge": "fg"
+          },
+          {
+            "view": "right",
+            "edge": "fg"
+          }
+        ],
+        "end_offsets_mm": [
+          0.0,
+          0.0
+        ],
+        "offset_evidence": {
+          "page": 1,
+          "bbox": [
+            0.05,
+            0.05,
+            0.95,
+            0.95
+          ],
+          "text": "人工构造的测试数据：synthetic joint-to-joint length equals cut length"
+        }
+      },
+      {
+        "id": "ac",
+        "mark": "104",
+        "occurrences": [
+          {
+            "view": "front",
+            "edge": "ac"
+          }
+        ],
+        "end_offsets_mm": [
+          0.0,
+          0.0
+        ],
+        "offset_evidence": {
+          "page": 1,
+          "bbox": [
+            0.05,
+            0.05,
+            0.95,
+            0.95
+          ],
+          "text": "人工构造的测试数据：synthetic joint-to-joint length equals cut length"
+        }
+      }
+    ],
+    "placements": [
+      {
+        "view": "front",
+        "origin_guess": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "u_guess": [
+          1.0,
+          0.0,
+          0.0
+        ],
+        "v_guess": [
+          0.0,
+          0.0,
+          1.0
+        ],
+        "fixed_rotation": true,
+        "orientation_evidence": {
+          "page": 1,
+          "bbox": [
+            0.05,
+            0.05,
+            0.95,
+            0.95
+          ],
+          "text": "人工构造的测试数据：known cuboid axes"
+        }
+      },
+      {
+        "view": "rear",
+        "origin_guess": [
+          0.0,
+          1200.0,
+          0.0
+        ],
+        "u_guess": [
+          1.0,
+          0.0,
+          0.0
+        ],
+        "v_guess": [
+          0.0,
+          0.0,
+          1.0
+        ],
+        "fixed_rotation": true,
+        "orientation_evidence": {
+          "page": 1,
+          "bbox": [
+            0.05,
+            0.05,
+            0.95,
+            0.95
+          ],
+          "text": "人工构造的测试数据：known cuboid axes"
+        }
+      },
+      {
+        "view": "top",
+        "origin_guess": [
+          0.0,
+          0.0,
+          1500.0
+        ],
+        "u_guess": [
+          1.0,
+          0.0,
+          0.0
+        ],
+        "v_guess": [
+          0.0,
+          1.0,
+          0.0
+        ],
+        "fixed_rotation": true,
+        "orientation_evidence": {
+          "page": 1,
+          "bbox": [
+            0.05,
+            0.05,
+            0.95,
+            0.95
+          ],
+          "text": "人工构造的测试数据：known cuboid axes"
+        }
+      },
+      {
+        "view": "bottom",
+        "origin_guess": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "u_guess": [
+          1.0,
+          0.0,
+          0.0
+        ],
+        "v_guess": [
+          0.0,
+          1.0,
+          0.0
+        ],
+        "fixed_rotation": true,
+        "orientation_evidence": {
+          "page": 1,
+          "bbox": [
+            0.05,
+            0.05,
+            0.95,
+            0.95
+          ],
+          "text": "人工构造的测试数据：known cuboid axes"
+        }
+      },
+      {
+        "view": "left",
+        "origin_guess": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "u_guess": [
+          0.0,
+          1.0,
+          0.0
+        ],
+        "v_guess": [
+          0.0,
+          0.0,
+          1.0
+        ],
+        "fixed_rotation": true,
+        "orientation_evidence": {
+          "page": 1,
+          "bbox": [
+            0.05,
+            0.05,
+            0.95,
+            0.95
+          ],
+          "text": "人工构造的测试数据：known cuboid axes"
+        }
+      },
+      {
+        "view": "right",
+        "origin_guess": [
+          2400.0,
+          0.0,
+          0.0
+        ],
+        "u_guess": [
+          0.0,
+          1.0,
+          0.0
+        ],
+        "v_guess": [
+          0.0,
+          0.0,
+          1.0
+        ],
+        "fixed_rotation": true,
+        "orientation_evidence": {
+          "page": 1,
+          "bbox": [
+            0.05,
+            0.05,
+            0.95,
+            0.95
+          ],
+          "text": "人工构造的测试数据：known cuboid axes"
+        }
+      }
+    ],
+    "relations": [],
+    "issues": []
+  },
+  "issues": []
+}

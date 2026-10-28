@@ -1,0 +1,10 @@
+# Tested on Python 3.12 / Windows. Optional exact environment for reproduction.
+pydantic==2.12.3
+httpx==0.28.1
+PyMuPDF==1.26.7
+numpy==2.3.5
+scipy==1.18.1
+ezdxf==1.4.4
+pytest==8.3.4
+Pillow==12.0.0
+shapely==2.1.2

@@ -1,0 +1,6 @@
+{
+  "schema_version": "1.0",
+  "name": "本地矢量图纸完整流程",
+  "diagnostic_tolerance_mm": 3,
+  "vision_review": {"enabled": false}
+}
