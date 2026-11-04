@@ -63,6 +63,7 @@ function applyPreviewEvidence(){
 }
 function updateModelLayers(){
   state.modelLayer?.setLayers(Object.fromEntries(["members","plates","holes"].map(k=>[k,$("model-"+k).checked])));
+  state.modelLayer?.setLabelsVisible($("model-labels").checked);
   state.modelLayer?.setOpacity(Number($("model-opacity").value));
 }
 function updateModelView(){
@@ -167,7 +168,7 @@ async function main(){
   for(const id of ["background","raw-page","ink","axes","overlap-layer","contacts","plate-layer","hole-layer","crossings"])$(id).addEventListener("change",render);
   $("fit").addEventListener("click",()=>{state.zoom=1;state.pan=[0,0];render();state.modelLayer?.align(transform());});$("search").addEventListener("input",refreshRecords);
   $("model-toggle").addEventListener("click",toggleModel);$("model-align").addEventListener("click",()=>state.modelLayer?.align(transform()));$("model-oblique").addEventListener("click",()=>state.modelLayer?.oblique());
-  for(const id of ["model-members","model-plates","model-holes","model-opacity"])$(id).addEventListener("input",updateModelLayers);
+  for(const id of ["model-members","model-plates","model-holes","model-labels","model-opacity"])$(id).addEventListener("input",updateModelLayers);
   document.querySelectorAll("[data-stage]").forEach(b=>b.addEventListener("click",()=>{state.stage=b.dataset.stage;$("search").value="";document.querySelectorAll("[data-stage]").forEach(x=>x.classList.toggle("active",x===b));$("plate-layer").checked=state.stage==="plates";$("hole-layer").checked=state.stage==="holes";refreshRecords();render();}));
   let down=null;const canvas=$("drawing");canvas.addEventListener("pointerdown",e=>{down={x:e.offsetX,y:e.offsetY,pan:[...state.pan],moved:false};canvas.setPointerCapture(e.pointerId);});canvas.addEventListener("pointermove",e=>{if(!down)return;const dx=e.offsetX-down.x,dy=e.offsetY-down.y;down.moved ||= Math.hypot(dx,dy)>4;state.pan=[down.pan[0]+dx,down.pan[1]+dy];render();});canvas.addEventListener("pointerup",e=>{if(down&&!down.moved){const p=[e.offsetX,e.offsetY],distance=h=>{if(h.p)return Math.hypot(h.p[0]-p[0],h.p[1]-p[1]);const d=[h.b[0]-h.a[0],h.b[1]-h.a[1]],t=Math.max(0,Math.min(1,((p[0]-h.a[0])*d[0]+(p[1]-h.a[1])*d[1])/(d[0]*d[0]+d[1]*d[1])));return Math.hypot(p[0]-h.a[0]-t*d[0],p[1]-h.a[1]-t*d[1]);};const best=state.hits.map(h=>({h,d:distance(h)})).sort((a,b)=>a.d-b.d)[0];if(best?.d<12)select(best.h.object);}down=null;});canvas.addEventListener("wheel",e=>{e.preventDefault();state.zoom=Math.min(20,Math.max(.3,state.zoom*Math.exp(-e.deltaY*.001)));render();},{passive:false});new ResizeObserver(render).observe(canvas.parentElement);
   const defaultView=[...state.data.views].sort((a,b)=>b.member_ids.length-a.member_ids.length||Number(b.role==="structural_view")-Number(a.role==="structural_view"))[0];

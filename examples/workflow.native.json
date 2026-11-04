@@ -2,5 +2,6 @@
   "schema_version": "1.0",
   "name": "本地矢量图纸完整流程",
   "diagnostic_tolerance_mm": 3,
-  "vision_review": {"enabled": false}
+  "vision_review": {"enabled": false},
+  "assembly": {"enabled": true, "tip_direction": "auto", "complete_missing_faces": true, "max_corrections": 12}
 }

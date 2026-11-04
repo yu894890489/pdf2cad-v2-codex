@@ -14,7 +14,7 @@ from .workflow_settings import load_workflow_settings
 STAGES = [('input', '检查图纸'), ('ocr', '恢复文字与分离文字笔画'), ('decompose', '解析 BOM 与图元'),
           ('topology', '整理结构面与连接关系'), ('audit', '尺寸初审'),
           ('preview', '识别检查与三维预览'), ('model_audit', '三维尺寸与初审比对'),
-          ('vision_review', '可选视觉复核'), ('final_check', '全流程终检')]
+          ('vision_review', '可选视觉复核'), ('assembly', '多面装配与反算补全'), ('final_check', '全流程终检')]
 
 
 class UnsupportedDrawing(ValueError):
@@ -206,6 +206,13 @@ def process_drawing(pdf, out, table_regions=None, review=None, title=None, confi
             next(s for s in state['stages'] if s['id'] == 'vision_review').update(status='skipped', reason='配置未启用视觉复核')
             save()
         state['vision_review_status'] = vision['status']
+        if options.assembly.enabled:
+            from .assembly_pipeline import publish_run_assembly
+            assembled=step('assembly',lambda:publish_run_assembly(out,options.assembly,state['source_name']))
+            state['assembly']={k:assembled[k] for k in ('status','message','counts')}
+        else:
+            next(s for s in state['stages'] if s['id']=='assembly').update(status='skipped',reason='配置关闭自动多面装配')
+            save()
         final = step('final_check', lambda: final_check(out))
         state['final_check_counts'] = final['counts']
         state.update(status='needs_review', counts=check['counts'],
@@ -221,6 +228,7 @@ def process_drawing(pdf, out, table_regions=None, review=None, title=None, confi
                               'audit': 'site/audit/', 'model_audit': 'site/model-audit/', 'final': 'site/final/', 'bom': 'site/tables/bom.json',
                               'model': 'site/topology/model-preview.json',
                               'checks': 'site/topology/final-check.json', 'report': 'model-preflight.md'}
+        if options.assembly.enabled:state['artifacts']['assembly']='site/assembly/'
         (out / 'failure.json').unlink(missing_ok=True)
     except Exception as exc:
         status = 'unsupported' if isinstance(exc, (UnsupportedDrawing, BomIntegrityError)) else 'failed'

@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="zh-CN">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>横担层 · 多面装配</title><link rel="stylesheet" href="/assembly-assets/style.css">
+<script type="importmap">{"imports":{"three":"/assembly-assets/three.module.js"}}</script>
+<script type="module" src="/assembly-assets/app.js"></script></head>
+<body>
+<header><a href="/">← 图纸工作台</a><div><strong id="title">横担层装配</strong><small id="save-state">正在读取装配…</small></div><button id="add">补充图纸</button><input type="file" id="pdfs" accept=".pdf,application/pdf" multiple hidden></header>
+<div id="error" role="alert" hidden></div>
+<section id="drawing-tools" aria-label="图纸解析与审核">
+<div class="drawing-heading"><strong>图纸解析与审核</strong><label>当前图纸 <select id="drawing-source" aria-label="当前查看结果的图纸"></select></label><span id="drawing-status" role="status"></span></div>
+<div id="drawing-actions" class="drawing-actions"></div>
+</section>
+<main>
+<aside class="left">
+<section id="automatic-pipeline-panel"><h2>自动处理结果</h2><p id="automatic-pipeline-status" class="note">自动完成公共件号装配、缺失面反算与尺寸复核。</p><div id="automatic-pipeline-details"></div><button id="automatic-pipeline" class="primary">自动装配并反算补全</button></section>
+<section id="missing-face-panel"><h2>缺失面反算与原图回查</h2><p class="note">按已拼邻面和公共件号反算轮廓，回查原图后修正整面杆件，并直接放到对应面。可撤销，尺寸差异会保留。</p><select id="missing-face" aria-label="待回查结构面"></select><button id="review-missing-face" class="primary">反算并回查原图</button><p id="missing-face-status" class="note"></p><div id="missing-face-result" hidden><div id="missing-face-dimensions"></div><div class="table-scroll"><table id="missing-face-comparisons"></table></div><div id="missing-face-issues"></div><label><input id="missing-face-outline" type="checkbox">显示反算轮廓（橙色）</label><label><input id="missing-face-native" type="checkbox">对照原图外包轴的刚性试拼</label><button id="focus-missing-face">正对修正底面</button><p class="note">黄色：保留段；橙色：补长段；红色虚线：截去段。原 PDF、BOM 和原识别尺寸保留，整面修正是按邻面约束生成的候选。</p><p><a id="missing-face-corrected" target="_blank" rel="noopener" hidden>查看修正后的结构图（含件号）</a></p><a id="missing-face-source" target="_blank" rel="noopener"><img id="missing-face-crop" alt="原图回查：黄色为外包轴候选，红色为原识别段">放大查看原图证据</a><p class="note">原图标注：黄色为原生轮廓延伸候选，红色虚线为原识别段；切口尚未确认。</p><a id="missing-face-report" target="_blank" rel="noopener">查看完整回查 JSON</a></div></section>
+<section><h2>装配检查</h2><p id="assessment">正在加载…</p><div id="metrics"></div><p class="note">边界为杆件与板形的外包多边形。闭合结果是几何候选，仍需按原图核对。</p><button id="auto">按公共件号尝试装配</button><p id="auto-status" class="note" role="status" aria-live="polite" hidden></p><button id="arrange">重新排列所有面</button></section>
+<section><h2>横向收口校正</h2><label>正视图的尖端方向<select id="tip-direction"><option value="">请选择尖端方向</option><option value="negative_x">左侧（正视面局部 −X）</option><option value="positive_x">右侧（正视面局部 +X）</option></select></label><p class="note">联合前后面及多个横向剖面的公共杆件，校正端点方向与夹角。固定正视面，保持原杆长；尺寸残差单独列出。</p><button id="preview-taper">预览收口校正</button><button id="apply-taper">应用收口校正</button><p id="taper-status" class="note"></p></section>
+<section><h2>装配依据与待核对项</h2><div id="review-summary"></div><div id="blockers"></div><div id="bridge-conflicts"></div><details><summary id="length-count">杆长与 BOM</summary><div id="length-conflicts"></div></details><details><summary id="overlap-count">重合杆件轴线</summary><div id="axis-overlaps"></div></details></section>
+<section><h2>图纸来源 <span id="source-count"></span></h2><div id="sources"></div><details><summary>从已处理图纸补充</summary><div id="existing-jobs"></div><button id="add-existing">加入所选图纸</button></details></section>
+<section><h2>全部结构面 <span id="face-count"></span></h2><p class="note">点击选择；复选框决定是否参与闭合检查，所有面始终可见。</p><div id="faces"></div></section>
+</aside>
+<div class="center">
+<nav class="manipulation-tools" aria-label="模型移动"><button id="drag-model" class="primary" aria-pressed="true">拖动模型</button><label>操作 <select id="mode"><option value="drag" selected>自由拖动</option><option value="orbit">旋转视角</option><option value="edge">选择连接边</option></select></label><label>移动方向 <select id="drag-axis"><option value="screen">自由（屏幕平面）</option><option value="xy">地面 XY</option><option value="x">仅 X 方向</option><option value="y">仅 Y 方向</option><option value="z">仅 Z 方向（升降）</option></select></label><label><input type="checkbox" id="move-connected" checked>移动整个连接组</label></nav>
+<nav><button id="fit">查看全部</button><button id="focus">聚焦所选面</button><button id="focus-group">聚焦连接组</button><button id="plan-group">俯视连接组</button><label><input type="checkbox" id="open-edges">显示未闭合边</label><label><input type="checkbox" id="envelopes" checked>面轮廓</label><label><input type="checkbox" id="face-titles">面名称</label><label><input type="checkbox" id="member-labels" checked>三维件号标牌</label><label>标牌大小 <input id="member-label-size" type="range" min="0.6" max="1.8" step="0.1" value="1" title="标牌随模型缩放，可在此调整实体大小" style="width:70px"></label><label>标注范围 <select id="member-label-scope"><option value="selected">所选面</option><option value="all">全部面</option></select></label></nav>
+<div id="viewport"><div id="loading">正在创建三维场景…</div><div id="legend">Z 轴向上 · XY 为地面<br>黄色：保留杆件 · 橙色：补长段<br>红色虚线：截去段 · 灰色：板形<br>蓝色点：孔位<br><label><input id="trimmed-segments" type="checkbox" checked>显示截去段</label></div></div>
+<div id="hint">按住模型拖动，空白处拖动旋转视角，滚轮缩放。松手自动保存；Esc 取消本次移动。</div>
+<div class="bottom"><button id="undo" disabled>撤销</button><button id="redo" disabled>重做</button><button id="export">导出布局 JSON</button><button id="import">导入布局</button><input type="file" id="layout-file" accept=".json" hidden><span>位置和连接自动保存在本机。</span></div>
+</div>
+<aside class="right">
+<section><h2 id="selected-title">选择一个面</h2><p id="face-info" class="note"></p><a id="source-image" target="_blank" rel="noopener">查看原结构图</a><img id="crop" alt="所选结构图" hidden>
+<button id="front">设为正视参考面</button><p class="note">自动装配以正视面垂直地面为起点；特殊倾角可在下方调整。</p>
+<div id="member-info" class="constraint" hidden><strong id="member-title"></strong><p id="member-detail"></p><small>件号对应当前识别结果，供逐杆核对。</small></div>
+<div class="fields"><label>X <input id="px" type="number" step="10"></label><label>Y <input id="py" type="number" step="10"></label><label>Z <input id="pz" type="number" step="10"></label><label>转 X° <input id="rx" type="number" step="1"></label><label>转 Y° <input id="ry" type="number" step="1"></label><label>转 Z° <input id="rz" type="number" step="1"></label></div><button id="apply-pose">应用位置 / 旋转</button>
+<details><summary>校正当前面比例</summary><label>毫米 / PDF 点 <input id="scale" type="number" min="0.0001" step="0.01"></label><button id="apply-scale">保存比例</button><p class="note">须来自该结构面的已知尺寸；比例变化后重新检查连接间隙。</p></details></section>
+<section><h2>边与边连接</h2><p class="note">在场景中依次点击两个面的边，或从下方选择。A 固定，B 及其连接组移动。</p><label>固定边 A<select id="edge-a"></select></label><label>移动边 B<select id="edge-b"></select></label><label>绕 A 边旋转角度（°）<input id="angle" type="number" min="-180" max="180" value="90"></label><label><input id="flip" type="checkbox" checked>反向对齐端点</label><p class="note">90° 为垂直，0° 为同向平行；方向相反可用 −90° 或切换端点。</p><button id="preview-connect">预览连接</button><button class="primary" id="connect">连接所选两边</button><button id="cancel-preview" hidden>取消预览</button><button id="clear-edges">清空选边</button><p id="preview-message" class="warn" hidden></p><p id="edge-info" class="note"></p>
+<details><summary id="match-count">候选公共边</summary><div id="matches"></div></details></section>
+<section><h2>连接与约束</h2><div id="links"></div><div id="constraints"></div></section>
+</aside>
+</main>
+</body></html>

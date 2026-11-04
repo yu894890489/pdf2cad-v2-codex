@@ -442,9 +442,16 @@ def recover_overlaps(members,plates,holes,geometry):
     scales={vid:view_scale(group) for vid,group in groups.items()}
     geometry_map={g["view_id"]:g for g in geometry}
     for vid,group in groups.items():
-        if scales[vid]:continue
-        scales[vid]=native_extent_scale(group,geometry_map[vid],[p for p in plates if p["view_id"]==vid],
-                                       [h for h in holes if h["view_id"]==vid])
+        # Several similarly clipped rods can agree on a false scale. Compare
+        # their observed continuations even when a short-span consensus exists.
+        # The alternative still needs an unchanged independent member, and must
+        # have strictly more supporting observations to replace a prior scale.
+        native=native_extent_scale(group,geometry_map[vid],[p for p in plates if p["view_id"]==vid],
+                                   [h for h in holes if h["view_id"]==vid])
+        previous=scales[vid]
+        if native and (not previous or len(native['supporting_member_ids'])>len(previous['supporting_member_ids'])):
+            if previous:native['superseded_visible_span_scale']=previous
+            scales[vid]=native
     # Borrow a page consensus only when at least two independent members in the
     # receiving view already agree. Edge-on sections are never scaled by title.
     page_scales=defaultdict(list)
@@ -465,9 +472,15 @@ def recover_overlaps(members,plates,holes,geometry):
         if len(support)>=2:
             scales[vid]={"mm_per_pt_candidate":ratio,"supporting_member_ids":support,
                          "supporting_view_ids":[v for v,_ in cluster],"status":"page_consensus_with_two_local_member_checks"}
+    from .topology_features import recheck_member_bands
+    for vid,group in groups.items():
+        recheck_member_bands(group,geometry_map[vid].get('bands',[]),scales[vid])
     original_map={m["id"]:m for m in originals}
     for member in members:
         vid=member["view_id"];source=original_map[member["id"]]
+        if source.get('association_recheck'):
+            for field in ('band_id','association_basis','association_recheck','primitive_ids','ambiguous','status','leader_primitive_ids'):
+                member[field]=copy.deepcopy(source[field])
         result=recover_member(source,geometry_map[vid]["strokes"],[p for p in plates if p["view_id"]==vid],
                               [h for h in holes if h["view_id"]==vid],groups[vid],scales[vid],geometry_map[vid].get("hidden_outlines",[]))
         member["visible_axis"]=copy.deepcopy(source.get("axis"))

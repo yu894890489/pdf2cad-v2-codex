@@ -4,7 +4,8 @@ import math
 import pytest
 
 from tower_rebuild.topology_features import circular_features, link_features
-from tower_rebuild.topology_overlap import recover_member, view_scale, native_extent_scale, hidden_outline_tracks
+from tower_rebuild.topology_overlap import recover_member, recover_overlaps, view_scale, native_extent_scale, hidden_outline_tracks
+from tower_rebuild.topology_features import recheck_member_bands
 
 
 def member(mid="rod",mark="501",length=140):
@@ -142,6 +143,63 @@ def test_native_continuations_supply_scale_with_an_unextended_check():
     # Without the independent original-span check, native candidates cannot
     # collectively certify their own scale.
     assert native_extent_scale(records[1:],{"strokes":strokes},[],[]) is None
+
+
+def test_clipped_member_consensus_cannot_hide_stronger_native_continuations():
+    records=[];strokes=[]
+    for i in range(4):
+        m=member(str(i),str(i),100 if i==0 else 140)
+        for point in list(m['axis'].values())+m['polygon']:point[1]+=i*25
+        records.append(m)
+        for j,s in enumerate(edges(0 if i==0 else -20,100 if i==0 else 120)):
+            for key in ('a','b'):s[key][1]+=i*25
+            s['id']=f's{i}_{j}';s['primitive_ids']=[s['id']];strokes.append(s)
+    assert view_scale(records)['mm_per_pt_candidate']==pytest.approx(1.4)
+    original=copy.deepcopy(records)
+    result=recover_overlaps(records,[],[],[{'view_id':'face','strokes':strokes}])
+    scale=result['view_scales']['face']
+    assert scale['mm_per_pt_candidate']==pytest.approx(1)
+    assert scale['superseded_visible_span_scale']['mm_per_pt_candidate']==pytest.approx(1.4)
+    for before,after in zip(original,records):
+        assert before['bom']==after['bom']
+        assert before['axis']==after['visible_axis']
+        assert math.dist(after['axis']['a'],after['axis']['b'])==pytest.approx(after['bom']['length_mm'])
+        assert not after['overlap_recovery']['full_endpoints_verified']
+
+
+def profile_bands():
+    m=member(length=200)
+    m.update(band_id='wrong',callout_primitive_ids=['circle'],status='proximity_candidate',
+             candidate_bands=[{'band_id':bid,'score':score,'leader_primitive_ids':[]} for bid,score in [('wrong',0),('leg',3)]])
+    m['bom']['classification']={'legs_mm':[20,20]}
+    bands=[{'id':bid,'a':[0,0],'b':[length,0],'polygon':[[0,-width/2],[length,-width/2],[length,width/2],[0,width/2]],
+            'length_pt':length,'width_pt':width,'primitive_ids':[bid]} for bid,width,length in [('wrong',3,140),('leg',10,70)]]
+    return m,bands,{'mm_per_pt_candidate':2,'supporting_member_ids':['independent_a','independent_b','independent_c']}
+
+
+def test_profile_recheck_selects_native_leg_and_retains_original_evidence():
+    m,bands,scale=profile_bands();before=copy.deepcopy(m)
+    recheck_member_bands([m],bands,scale)
+    assert m['band_id']=='leg'
+    assert m['axis']=={'a':[0,0],'b':[70,0]}  # Remains partial; no forced BOM endpoint.
+    assert m['bom']==before['bom']
+    assert m['association_recheck']['previous_axis']==before['axis']
+    assert m['association_recheck']['previous_width_mm']==6
+    assert m['association_recheck']['selected_width_mm']==20
+
+
+@pytest.mark.parametrize('condition',['manual','self_calibrated','multiple_candidates','oversize'])
+def test_profile_recheck_preserves_uncertain_or_reviewed_association(condition):
+    m,bands,scale=profile_bands()
+    if condition=='manual':m['status']='reviewed_2d_association'
+    if condition=='self_calibrated':scale['supporting_member_ids'].append(m['id'])
+    if condition=='multiple_candidates':
+        bands.append({**bands[-1],'id':'other'})
+        m['candidate_bands'].append({**m['candidate_bands'][-1],'band_id':'other'})
+    if condition=='oversize':bands[-1]['length_pt']=300
+    before=copy.deepcopy(m)
+    recheck_member_bands([m],bands,scale)
+    assert m==before
 
 
 def hidden_fragments(sides=(-5,5)):

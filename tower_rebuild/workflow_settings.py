@@ -36,12 +36,20 @@ class OcrSettings(Strict):
         return self
 
 
+class AssemblySettings(Strict):
+    enabled: bool = True
+    tip_direction: Literal['auto', 'negative_x', 'positive_x'] = 'auto'
+    complete_missing_faces: bool = True
+    max_corrections: int = Field(default=12, ge=0, le=30)
+
+
 class WorkflowSettings(Strict):
     schema_version: Literal['1.0'] = '1.0'
     name: str = '本地矢量图纸'
     diagnostic_tolerance_mm: float = Field(default=3, ge=0, le=20)
     ocr: OcrSettings = Field(default_factory=OcrSettings)
     vision_review: VisionReviewSettings = Field(default_factory=VisionReviewSettings)
+    assembly: AssemblySettings = Field(default_factory=AssemblySettings)
 
 
 def load_workflow_settings(config=None):

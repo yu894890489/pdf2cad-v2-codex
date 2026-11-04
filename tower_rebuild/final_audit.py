@@ -70,8 +70,19 @@ def final_check(run_dir):
           f'{counts["hole_projections"]} 个孔/螺栓投影，{counts["explicit_hole_diameters"]} 个明确孔径，{counts["hole_owner_pending"]} 个归属待定；孔距尺寸链仍需对应。', '../model-audit/')
     check('quantities', '实物数量与跨面去重', 'pending',
           '同件号可对应多根实物，同一根实物可出现在多个视图；目前观察数不能用于 BOM 实物数量验收。', '../topology/graph.json')
-    check('assembly', '各结构面的空间装配', 'pending',
-          '当前输出逐面三维实体；跨面刚体变换、共享实物和角钢朝向尚未全部确认。', '../topology/')
+    assembly_path=site/'assembly/report.json'
+    if assembly_path.exists():
+        assembly=read_json(assembly_path)
+        if assembly.get('source_sha256')!=source or any(file_digest(site/n)!=v for n,v in assembly.get('input_files',{}).items()):
+            raise ValueError('自动装配使用旧输入，请重新执行多面装配与反算补全。')
+        names['assembly']='assembly/report.json'
+        check('assembly','各结构面的空间装配','pending',assembly['message'],'../assembly/')
+        ac=assembly['counts']
+        check('assembly_dimensions','装配补全后的杆件与接缝尺寸','fail' if ac['bom_differences'] or ac['pending_connections'] else 'pending',
+              f"反算修正 {ac['corrected_face_count']} 个面，{ac['bom_differences']} 条杆长/BOM 差异，{ac['pending_connections']} 条接缝待核对；按邻面补全不计为独立验证。",'../assembly/report.json')
+    else:
+        check('assembly', '各结构面的空间装配', 'pending',
+              '当前输出逐面三维实体；跨面刚体变换、共享实物和角钢朝向尚未全部确认。', '../topology/')
     visual_findings = sum(len(v.get('findings', [])) for v in vision.get('views', []))
     check('vision', '可选视觉模型交叉复核', 'not_requested' if not options.vision_review.enabled else 'pending',
           f'服务状态：{vision["status"]}；发现 {visual_findings} 条视觉疑点。空疑点列表不能批准模型。',

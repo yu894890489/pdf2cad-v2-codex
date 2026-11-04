@@ -3,7 +3,7 @@ from concurrent.futures import ThreadPoolExecutor
 from functools import partial
 from pathlib import Path
 from threading import RLock
-from urllib.parse import unquote, urlsplit
+from urllib.parse import unquote, urlsplit, parse_qs
 import json
 import mimetypes
 import secrets
@@ -16,6 +16,7 @@ from .io import read_json, write_json
 from .server import Handler, LocalHTTPServer
 from .workflow import now
 from .workflow_settings import load_workflow_settings
+from .assembly_projects import AssemblyProjects, AssemblyConflict
 
 
 MAX_UPLOAD = 100 * 1024 * 1024
@@ -40,6 +41,7 @@ class JobStore:
                 job.update(status='interrupted', error='上次服务中断，请点击重试。')
                 write_json(file, job)
             self.jobs[job['id']] = job
+        self.assemblies = AssemblyProjects(self)
 
     def save(self, job):
         job['updated_at'] = now()
@@ -95,6 +97,12 @@ class JobStore:
                 else:
                     job.update(status='failed', error=(workflow.get('error') or {}).get('message', f'处理进程退出 {code}，请查看运行日志。'))
                 self.save(job)
+                if job['status']=='needs_review' and workflow.get('assembly'):
+                    related=[r['id'] for r in self.assemblies.records.values() if jid in r['job_ids']]
+                    if related:
+                        for aid in related:self.assemblies.refresh(aid)
+                    else:
+                        self.assemblies.create([jid],title='自动装配 · '+job['name'][:100])
         except Exception as exc:
             with self.lock:
                 job.update(status='failed', error=str(exc))
@@ -122,8 +130,13 @@ class JobStore:
             workflow = folder / 'run/workflow.json'
             job['workflow'] = read_json(workflow) if workflow.exists() else None
             job['links'] = {'source': f'/api/jobs/{jid}/source'}
+            related = [r for r in self.assemblies.records.values() if jid in r['job_ids']]
+            if related:
+                aid = max(related,key=lambda r:r['created_at'])['id']
+                job['links']['assembly'] = f'/assemblies/{aid}/'
             site = folder / 'run/site'
             for key, target in [('ocr', 'ocr/index.html'), ('tables', 'index.html'), ('topology', 'topology/index.html'),
+                                ('automaticassembly','assembly/index.html'),
                                 ('audit', 'audit/index.html'), ('modelaudit', 'model-audit/index.html'), ('final', 'final/index.html'), ('bom', 'tables/bom.json'),
                                 ('bomcheck', 'tables/bom-check.json'), ('bomrows', 'tables/bom-observations.json'),
                                 ('model', 'topology/model-preview.json'), ('checks', 'topology/final-check.json')]:
@@ -198,9 +211,42 @@ class StudioHandler(Handler):
                                    'vision_mode': 'disabled' if not vision.enabled else 'remote' if vision.service.allow_remote else 'local'})
             elif path == '/api/jobs':
                 self.respond_json({'jobs': self.store.listing()})
+            elif path == '/api/assemblies':
+                self.respond_json({'assemblies': self.store.assemblies.listing()})
+            elif len(bits) == 3 and bits[:2] == ['api','assemblies']:
+                self.respond_json(self.store.assemblies.snapshot(bits[2],full=True))
+            elif len(bits) == 2 and bits[0] == 'assemblies':
+                if bits[1] not in self.store.assemblies.records:raise KeyError(bits[1])
+                if not path.endswith('/'):
+                    self.send_response(302);self.send_header('Location',path+'/');self.end_headers()
+                else:
+                    self.send_file(Path(__file__).with_name('assembly_web')/'index.html')
+            elif len(bits) == 3 and bits[0] == 'assemblies' and bits[2] in {'missing-face-source.png','missing-face-source.svg','missing-face-corrected.svg','missing-face-review.json'}:
+                with self.store.lock:
+                    project=self.store.assemblies.snapshot(bits[1],full=True)
+                    report=project.get('missing_face_review')
+                    requested=parse_qs(urlsplit(self.path).query).get('basis',[None])[0]
+                    if not report or requested!=report.get('artifact_key',report['basis_signature']):
+                        self.respond_json({'error':'回查依据已变化，请重新计算缺失面。'},409)
+                    elif bits[2]=='missing-face-corrected.svg' and report.get('correction',{}).get('status')!='applied_candidate':
+                        self.respond_json({'error':'本次回查未生成修正结构图，请查看回查原因。'},409)
+                    elif bits[2] in {'missing-face-source.svg','missing-face-source.png'} and not report.get('source_overlay_available'):
+                        self.respond_json({'error':'本次回查没有可用的原图裁剪。'},409)
+                    else:
+                        self.send_file(self.store.assemblies.root/bits[1]/bits[2])
+            elif len(bits) == 2 and bits[0] == 'assembly-assets':
+                if bits[1] in {'app.js','style.css','drawing-actions.js'}:
+                    self.send_file(Path(__file__).with_name('assembly_web')/bits[1])
+                elif bits[1] == 'member-labels.js':
+                    self.send_file(Path(__file__).with_name('topology_web')/bits[1])
+                elif bits[1] in {'three.module.js','three.core.js','OrbitControls.js'}:
+                    self.send_file(Path(__file__).with_name('topology_web')/'vendor'/bits[1])
+                else:self.send_error(404)
             elif len(bits) >= 3 and bits[:2] == ['api', 'jobs']:
                 jid = bits[2]
-                self.store.snapshot(jid)  # Only known generated IDs can select a directory.
+                # Immutable files do not need the global job/assembly lock.
+                # A large batch solve must not block another drawing's viewer.
+                if jid not in self.store.jobs:raise KeyError(jid)
                 if len(bits) == 3:
                     self.respond_json(self.store.snapshot(jid))
                 elif len(bits) == 4 and bits[3] in {'source', 'report', 'log', 'input-report'}:
@@ -210,7 +256,7 @@ class StudioHandler(Handler):
                     self.send_error(404)
             elif len(bits) >= 2 and bits[0] == 'results':
                 jid = bits[1]
-                self.store.snapshot(jid)
+                if jid not in self.store.jobs:raise KeyError(jid)
                 root = (self.store.root / jid / 'run/site').resolve()
                 file = (root / '/'.join(bits[2:])).resolve()
                 if not file.is_relative_to(root):
@@ -236,6 +282,8 @@ class StudioHandler(Handler):
                 self.send_file(assets / ('index.html' if path == '/' else path[1:]))
         except (KeyError, FileNotFoundError):
             self.respond_json({'error': '未找到该图纸任务。'}, 404)
+        except ValueError as exc:
+            self.respond_json({'error':str(exc)},400)
 
     def do_HEAD(self):
         self.do_GET()
@@ -247,6 +295,16 @@ class StudioHandler(Handler):
         path = urlsplit(self.path).path
         bits = path.strip('/').split('/')
         try:
+            if bits[:2] == ['api','assemblies'] and len(bits) in {2,3}:
+                length=int(self.headers.get('Content-Length',0))
+                if not 0<length<=2*1024*1024:raise ValueError('装配请求大小无效。')
+                body=json.loads(self.rfile.read(length))
+                if not isinstance(body,dict):raise ValueError('装配请求必须是 JSON 对象。')
+                if len(bits)==2:
+                    self.respond_json(self.store.assemblies.create(body.get('job_ids'),body.get('title','横担层装配')),201)
+                else:
+                    self.respond_json(self.store.assemblies.mutate(bits[2],body))
+                return
             if len(bits) == 4 and bits[:2] == ['api', 'jobs'] and bits[3] == 'retry':
                 self.respond_json(self.store.retry(bits[2]), 202)
                 return
@@ -281,9 +339,11 @@ class StudioHandler(Handler):
                 folder.rmdir()
                 raise
             self.respond_json(self.store.submit(jid, filename), 202)
+        except AssemblyConflict as exc:
+            self.respond_json({'error':str(exc)},409)
         except KeyError:
             self.respond_json({'error': '未找到需要重试的图纸。'}, 404)
-        except (ValueError, TimeoutError) as exc:
+        except (ValueError, TypeError, TimeoutError) as exc:
             self.respond_json({'error': str(exc)}, 400)
 
 

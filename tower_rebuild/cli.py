@@ -29,6 +29,10 @@ def main(argv=None):
     command.add_argument('--out', type=Path)
     command = sub.add_parser('final-check', help='汇总识别、拓扑、尺寸和三维的全流程终检')
     command.add_argument('--out', type=Path, required=True)
+    command = sub.add_parser('assemble', help='对已解析图纸自动组合结构面、反算补全并复核尺寸')
+    command.add_argument('--out', type=Path, required=True)
+    command.add_argument('--config', type=Path)
+    command.add_argument('--tip-direction', choices=['auto','negative_x','positive_x'])
     command = sub.add_parser("decompose", help="分离表格并分类原生图元；不调用视觉模型")
     command.add_argument("pdf", type=Path)
     command.add_argument("--out", type=Path, required=True)
@@ -70,7 +74,7 @@ def main(argv=None):
     command.add_argument("--out", type=Path, required=True)
     args = parser.parse_args(argv)
     try:
-        settings = Settings.model_validate(read_json(args.config)) if getattr(args, "config", None) and args.command not in {'process', 'studio', 'doctor'} else Settings()
+        settings = Settings.model_validate(read_json(args.config)) if getattr(args, "config", None) and args.command not in {'process', 'studio', 'doctor','assemble'} else Settings()
         if args.command == 'studio':
             from .studio import serve_studio
             serve_studio(args.root, args.port, args.config)
@@ -86,6 +90,28 @@ def main(argv=None):
         if args.command == 'final-check':
             from .final_audit import final_check
             final_check(args.out)
+            return 2
+        if args.command=='assemble':
+            from .assembly_pipeline import publish_run_assembly
+            from .workflow_settings import load_workflow_settings
+            from .final_audit import final_check
+            from .workflow import now
+            saved=args.out/'workflow-config.json'
+            options=load_workflow_settings(args.config or (saved if saved.exists() else None))
+            if args.tip_direction:options.assembly.tip_direction=args.tip_direction
+            state_path=args.out/'workflow.json';state=read_json(state_path) if state_path.exists() else {}
+            report=publish_run_assembly(args.out,options.assembly,state.get('source_name'))
+            final=final_check(args.out)
+            if state:
+                state['assembly']={k:report[k] for k in ('status','message','counts')}
+                state['final_check_counts']=final['counts'];state['updated_at']=now()
+                state.setdefault('artifacts',{})['assembly']='site/assembly/'
+                stage=next((s for s in state['stages'] if s['id']=='assembly'),None)
+                if stage is None:
+                    stage={'id':'assembly','label':'多面装配与反算补全'};state['stages'].insert(-1,stage)
+                stage.update(status='completed',finished_at=now())
+                write_json(state_path,state)
+            print(report['message'],flush=True)
             return 2
         if args.command == 'process':
             from .workflow import process_drawing
@@ -109,6 +135,11 @@ def main(argv=None):
             from .final_audit import final_check
             build_preview(args.out)
             audit_model_dimensions(args.out)
+            from .assembly_pipeline import publish_run_assembly
+            from .workflow_settings import load_workflow_settings
+            config_path=args.out/'workflow-config.json'
+            options=load_workflow_settings(config_path if config_path.exists() else None)
+            if options.assembly.enabled:publish_run_assembly(args.out,options.assembly)
             final_check(args.out)
             return 2
         if args.command == "model-audit":

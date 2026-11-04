@@ -20,7 +20,7 @@ tower-rebuild = "tower_rebuild.cli:main"
 include = ["tower_rebuild*"]
 
 [tool.setuptools.package-data]
-tower_rebuild = ["web/*", "decomposition_web/*", "topology_web/*", "topology_web/vendor/*", "audit_web/*", "model_audit_web/*", "final_web/*", "studio_web/*", "ocr_web/*"]
+tower_rebuild = ["web/*", "decomposition_web/*", "topology_web/*", "topology_web/vendor/*", "audit_web/*", "model_audit_web/*", "final_web/*", "studio_web/*", "ocr_web/*", "assembly_web/*"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

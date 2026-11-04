@@ -171,3 +171,36 @@ def test_results_cannot_serve_files_above_the_generated_site(studio, tmp_path):
         with pytest.raises(HTTPError) as error:
             urlopen(base + '/results/known/' + suffix, timeout=5)
         assert error.value.code in {403, 404}
+
+
+def test_static_results_load_while_an_assembly_holds_the_job_lock(studio):
+    base,store=studio
+    folder=store.root/'known';(folder/'run/site').mkdir(parents=True)
+    (folder/'run/site/index.html').write_bytes(b'<html>model</html>')
+    (folder/'source.pdf').write_bytes(b'%PDF-source')
+    store.jobs['known']={'id':'known','name':'file.pdf','status':'needs_review'}
+    # A handler runs in another thread; attempting snapshot() would deadlock
+    # until the HTTP timeout while this thread owns the job lock.
+    with store.lock:
+        for path,expected in [('/results/known/',b'<html>model</html>'),('/api/jobs/known/source',b'%PDF-source')]:
+            with urlopen(base+path,timeout=3) as response:assert response.read()==expected
+        with pytest.raises(HTTPError) as error:urlopen(base+'/results/unknown/',timeout=3)
+        assert error.value.code==404
+
+
+def test_missing_face_artifacts_never_reuse_files_from_a_previous_result(studio,monkeypatch):
+    base,store=studio
+    folder=store.assemblies.root/'known';folder.mkdir(parents=True)
+    for name in ('missing-face-corrected.svg','missing-face-source.svg'):
+        (folder/name).write_text('<svg/>',encoding='utf8')
+    report={'artifact_key':'current','basis_signature':'basis','correction':{'status':'applied_candidate'},'source_overlay_available':True}
+    monkeypatch.setattr(store.assemblies,'snapshot',lambda *a,**kw:{'missing_face_review':report})
+    path=base+'/assemblies/known/'
+    with urlopen(path+'missing-face-corrected.svg?basis=current',timeout=5) as response:assert response.status==200
+    with pytest.raises(HTTPError) as error:urlopen(path+'missing-face-corrected.svg?basis=stale',timeout=5)
+    assert error.value.code==409
+    report['correction']['status']='blocked'
+    report['source_overlay_available']=False
+    for name in ('missing-face-corrected.svg','missing-face-source.svg'):
+        with pytest.raises(HTTPError) as error:urlopen(path+name+'?basis=current',timeout=5)
+        assert error.value.code==409

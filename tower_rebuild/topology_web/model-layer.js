@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import {OrbitControls} from './vendor/OrbitControls.js';
+import {MemberLabels} from './member-labels.js';
 
 function meshEnvelope(positions,direction){
   const unique=new Map();for(let i=0;i<positions.count;i++){const p=[positions.getX(i),positions.getY(i)];unique.set(p.join(','),p);}
@@ -28,6 +29,7 @@ export class ModelLayer {
     this.renderer.outputColorSpace=THREE.SRGBColorSpace;this.renderer.domElement.id='model-canvas';
     this.renderer.domElement.setAttribute('aria-label','可旋转的当前结构面三维模型');container.append(this.renderer.domElement);
     this.scene=new THREE.Scene();this.camera=new THREE.OrthographicCamera(-1,1,1,-1,.01,100000);
+    this.memberLabels=new MemberLabels(this.scene,item=>this.selectRecord(item.record));this.labelsVisible=true;
     this.scene.add(new THREE.HemisphereLight(0xffffff,0x727c8c,2.5));
     const light=new THREE.DirectionalLight(0xffffff,3);light.position.set(200,300,1000);this.scene.add(light);
     this.controls=new OrbitControls(this.camera,this.renderer.domElement);this.controls.enableDamping=true;this.controls.dampingFactor=.12;
@@ -39,14 +41,16 @@ export class ModelLayer {
       if(!down||Math.hypot(e.clientX-down[0],e.clientY-down[1])>4)return;
       const box=this.renderer.domElement.getBoundingClientRect(),p=new THREE.Vector2((e.clientX-box.left)/box.width*2-1,1-(e.clientY-box.top)/box.height*2);
       const ray=new THREE.Raycaster();ray.setFromCamera(p,this.camera);
+      const label=this.memberLabels.pick(ray,this.pickables);if(label){this.selectRecord(label.record);return;}
       const found=ray.intersectObjects(this.pickables).find(h=>h.object.parent.visible&&h.object.visible);
-      if(found)this.onSelect(found.object.userData.record);
+      if(found)this.selectRecord(found.object.userData.record);
     });
     this.renderer.domElement.addEventListener('webglcontextlost',e=>{e.preventDefault();this.visible=false;this.onFailure('三维绘图上下文丢失，请刷新页面重试。二维原图仍可使用。');});
     this.observer=new ResizeObserver(()=>this.resize());this.observer.observe(container.parentElement);
     const animate=()=>{requestAnimationFrame(animate);if(this.visible){this.controls.update();this.draw();}};animate();
   }
   clear(){
+    this.selectedMemberKey=null;this.memberLabels.setItems([]);
     if(this.root){this.root.traverse(o=>{o.geometry?.dispose();if(o.material){for(const m of [].concat(o.material))m.dispose();}});this.scene.remove(this.root);}
     this.root=new THREE.Group();this.scene.add(this.root);this.groups={};this.pickables=[];
     for(const kind of ['members','plates','holes']){const group=new THREE.Group();this.root.add(group);this.groups[kind]=group;}
@@ -63,7 +67,7 @@ export class ModelLayer {
     const xy=p=>[p[0]-cx,cy-p[1]];this.extent=Math.max(b[2]-b[0],b[3]-b[1],20);
     const maxLeg=Math.max(1,...model.members.map(m=>Math.max(...m.section.legs_mm)/(ratio||1)));
     this.layerGap=maxLeg*1.15;const lift=side=>side?.includes('后')?-this.layerGap:this.layerGap;
-    const memberHeights=new Map(),plateHeights=new Map();
+    const memberHeights=new Map(),plateHeights=new Map(),labels=[];
     if(ratio){
       for(const m of model.members){
         const [a1,a2]=m.section.legs_mm.map(x=>x/ratio),t=m.section.thickness_mm/ratio;
@@ -75,6 +79,8 @@ export class ModelLayer {
         mesh.matrixAutoUpdate=false;mesh.matrix.makeBasis(n,new THREE.Vector3(0,0,1),u);
         mesh.matrix.setPosition(a[0]-n.x*a1/2,a[1]-n.y*a1/2,lift(m.side));
         memberHeights.set(m.id,lift(m.side)+t+.1);
+        const text=`${m.side||''}${m.mark??'未标号'}`;
+        labels.push({key:m.id,text,record:mesh.userData.record,faceId:model.view_id,object:this.groups.members,point:new THREE.Vector3((a[0]+b[0])/2,(a[1]+b[1])/2,lift(m.side)),direction:u.clone(),memberWidth:Math.max(a1,a2),labelHeight:Math.min(140,Math.max(60,this.extent*ratio*.017))/ratio,title:`件号 ${text} · ${m.specification}\nBOM ${m.bom_length_mm} mm / 模型轴长 ${(length*ratio).toFixed(1)} mm`});
       }
       let detailVariant=0;
       for(const p of model.plates){
@@ -100,6 +106,7 @@ export class ModelLayer {
     this.stats={view_id:model.view_id,angle_meshes:this.groups.members.children.length,plate_meshes:this.groups.plates.children.length,
       hole_markers:this.groups.holes.children.length,drilled_plate_holes:model.plates.reduce((n,p)=>n+p.drill_holes.length,0),
       materials:'BOM angle L sections and plate thicknesses',source_sha256:model.source_sha256};
+    this.memberLabels.setItems(labels);
     this.resize();this.align(transform);this.draw();
   }
   measureGeometry(){
@@ -144,6 +151,12 @@ export class ModelLayer {
   oblique(){const t=this.controls.target;this.camera.position.set(t.x+this.extent*.9,t.y+this.extent*.6,this.extent*2);this.controls.update();this.draw();}
   setVisible(visible){this.visible=visible;this.container.hidden=!visible;this.controls.enabled=visible;this.draw();}
   setLayers(options){for(const [k,g] of Object.entries(this.groups||{}))g.visible=options[k];this.draw();}
+  setLabelsVisible(value){this.labelsVisible=value;this.draw();}
+  selectRecord(record){
+    this.selectedMemberKey=record.kind==='members'?record.id:null;
+    for(const mesh of this.groups.members.children){const active=mesh.userData.record.id===this.selectedMemberKey;mesh.material.color.set(active?0xf58216:0xe6b800);mesh.material.depthTest=!active;mesh.renderOrder=active?7:0;}
+    this.onSelect(record);this.draw();
+  }
   setOpacity(value){this.opacity=value;this.root?.traverse(o=>{if(o.isMesh&&o.material.isMeshStandardMaterial)o.material.opacity=value;});this.draw();}
-  draw(){if(this.model&&this.visible)this.renderer.render(this.scene,this.camera);}
+  draw(){if(this.model&&this.visible){this.memberLabels.update(this.camera,{enabled:this.labelsVisible,selectedKey:this.selectedMemberKey});this.renderer.render(this.scene,this.camera);}}
 }

@@ -220,6 +220,51 @@ def part_observations(view, callouts, bom, bands, contours, holes, strokes):
     return members,plates,unknown
 
 
+def recheck_member_bands(members,bands,scale):
+    """Reject a neighboring thin strip when a local full-leg outline is supported.
+
+    This changes the association only, never crops a rod to its BOM length.
+    Partial native bands still pass through the conservative endpoint recovery.
+    """
+    if not scale:return
+    ratio=scale['mm_per_pt_candidate'];lookup={b['id']:b for b in bands}
+    for member in members:
+        if member.get('status')=='reviewed_2d_association' or member['id'] in scale['supporting_member_ids']:continue
+        legs=member['bom'].get('classification',{}).get('legs_mm',[])
+        current=lookup.get(member.get('band_id'))
+        if not current or not legs:continue
+        error=lambda band:min(abs(band['width_pt']*ratio/leg-1) for leg in legs)
+        if error(current)<=.2:continue
+        current_choice=next((c for c in member.get('candidate_bands',[]) if c['band_id']==current['id']),None)
+        if not current_choice:continue
+        direction=np.array(current['b'],dtype=float)-current['a'];direction/=np.linalg.norm(direction)
+        options=[]
+        for choice in member['candidate_bands']:
+            band=lookup.get(choice['band_id'])
+            if not band or error(band)>.08 or choice['score']>current_choice['score']+8:continue
+            axis=np.array(band['b'],dtype=float)-band['a'];axis/=np.linalg.norm(axis)
+            if abs(float(direction@axis))<math.cos(math.radians(2)):continue
+            if band['length_pt']*ratio>member['bom']['length_mm']*1.03:continue
+            if current_choice['leader_primitive_ids'] and not choice['leader_primitive_ids']:continue
+            options.append((band,choice))
+        # Width alone must not decide between competing physical rods.
+        if len(options)!=1:continue
+        band,choice=options[0]
+        member['association_recheck']={'basis':'independent_view_scale_and_bom_leg_width',
+            'previous_band_id':current['id'],'previous_axis':copy_axis(member['axis']),
+            'previous_width_mm':current['width_pt']*ratio,'selected_band_id':band['id'],
+            'selected_width_mm':band['width_pt']*ratio,'bom_legs_mm':legs,'scale_evidence':scale,
+            'engineering_verified':False}
+        member.update(band_id=band['id'],axis={'a':band['a'][:],'b':band['b'][:]},polygon=band['polygon'],
+                      association_basis='native_parallel_outlines + independent_scale_and_bom_leg_width',
+                      leader_primitive_ids=choice['leader_primitive_ids'],ambiguous=False,status='profile_supported_candidate')
+        member['primitive_ids']=sorted(set(member['callout_primitive_ids']+band['primitive_ids']+choice['leader_primitive_ids']))
+
+
+def copy_axis(axis):
+    return {key:value[:] for key,value in axis.items()}
+
+
 def link_features(members, plates, holes):
     """Containment is a projected ownership candidate, not a drilled part count."""
     for part in members+plates:

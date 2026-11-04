@@ -1,7 +1,27 @@
-'use strict';
+import {renderDrawingActions} from '/assembly-assets/drawing-actions.js';
 const $=id=>document.getElementById(id);
 const labels={queued:'等待处理',running:'正在处理',needs_review:'已生成 · 待复核',no_model:'证据不足 · 未生成实体',failed:'处理失败',unsupported:'需要补充输入',interrupted:'处理已中断'};
 let selected=[],session=null,busy=false,pollTimer=null;
+const assemblySelection=new Set();
+const assemblySourceSelection=new Map();
+async function createAssembly(ids){return request('/api/assemblies',{method:'POST',headers:{'Content-Type':'application/json','X-Upload-Token':session.token},body:JSON.stringify({job_ids:ids,title:`横担层装配 · ${new Date().toLocaleString()}`})});}
+function renderAssemblies(projects,jobs){
+  const byId=new Map(jobs.map(j=>[j.id,j]));
+  $('assemblies').replaceChildren();
+  if(!projects.length)node('p','上传新图纸，或从下方勾选已处理图纸创建装配项目。',$('assemblies'),'muted');
+  for(const p of projects){
+    const row=node('article',undefined,$('assemblies'),'job');row.dataset.assemblyId=p.id;
+    node('h3',p.title,row);node('p',`${p.sources.length} 张图纸 · ${p.face_count} 个面 · ${p.waiting?'等待解析完成':p.assessment.message}`,row,'job-message');link(row,'打开三维装配',p.url,true);
+    const label=node('label','图纸解析与审核：',row,'drawing-selector'),select=node('select',undefined,label);select.setAttribute('aria-label','选择查看处理结果的图纸');
+    for(const s of p.sources){const o=node('option',s.name,select);o.value=s.id;}
+    const preferred=assemblySourceSelection.get(p.id)||p.sources.find(s=>p.assessment.links?.some(l=>l.a.startsWith(s.id+':')))?.id||p.sources.find(s=>s.model_available)?.id||p.sources[0]?.id;
+    if(p.sources.some(s=>s.id===preferred))select.value=preferred;
+    const actions=node('div',undefined,row,'actions');
+    const update=()=>{assemblySourceSelection.set(p.id,select.value);renderDrawingActions(actions,byId.get(select.value),{onRetry:retryJob});};
+    select.onchange=update;update();
+  }
+}
+async function retryJob(job){try{await request(`/api/jobs/${job.id}/retry`,{method:'POST',headers:{'X-Upload-Token':session.token}});error('');await refresh();}catch(e){error(e.message);}}
 function node(tag,text,parent,className){const n=document.createElement(tag);if(text!==undefined)n.textContent=text;if(className)n.className=className;if(parent)parent.append(n);return n;}
 function error(message){$('error').hidden=!message;$('error').textContent=message||'';}
 async function request(path,options={}){const response=await fetch(path,{...options,signal:AbortSignal.timeout(30000)});let data;try{data=await response.json();}catch{throw Error(`本地服务返回了无效数据（HTTP ${response.status}），请检查服务是否仍在运行。`);}if(!response.ok)throw Error(data.error||`HTTP ${response.status}`);return data;}
@@ -16,6 +36,7 @@ function renderJobs(jobs){
   for(const j of jobs){
     const card=node('article',undefined,$('jobs'),'job');card.dataset.jobId=j.id;card.dataset.status=j.status;
     const header=node('div',undefined,card,'job-head'),title=node('div',undefined,header);
+    const selectLabel=node('label',undefined,title,'meta'),selectBox=node('input',undefined,selectLabel);selectBox.type='checkbox';selectBox.checked=assemblySelection.has(j.id);selectBox.dataset.assemblyJob=j.id;selectBox.onchange=()=>selectBox.checked?assemblySelection.add(j.id):assemblySelection.delete(j.id);selectLabel.append(' 加入联合装配');
     node('h3',j.name,title);node('div',`${new Date(j.created_at).toLocaleString()} · ${j.id.slice(0,8)}${j.retry_of?' · 重试记录':''}`,title,'meta');node('span',labels[j.status]||j.status,header,'badge '+j.status);
     const w=j.workflow;
     if(w?.stages){const list=node('ol',undefined,card,'steps');for(const [i,s] of w.stages.entries())node('li',`${i+1}. ${s.label}`,list,s.status);}
@@ -27,11 +48,11 @@ function renderJobs(jobs){
     if(w?.input_coverage?.issues.length){const detail=node('details',undefined,card);node('summary',`有 ${w.input_coverage.pages_with_coverage_issues} 页尚未完整覆盖`,detail);const list=node('ul',undefined,detail,'job-message issue');for(const issue of w.input_coverage.issues)node('li',issue.message,list);}
     if(w?.bom_integrity?.status==='blocked'){const detail=node('details',undefined,card);detail.open=true;node('summary','BOM 原始行需要核对',detail);const list=node('ul',undefined,detail,'job-message issue');for(const issue of w.bom_integrity.issues)node('li',issue.message,list);}
     const actions=node('div',undefined,card,'actions');
-    for(const [key,text] of [['topology','打开图纸与三维'],['final','全流程终检'],['ocr','OCR 文字与笔画'],['tables','BOM 与图元'],['audit','尺寸初审'],['modelaudit','三维尺寸复核'],['report','检查报告'],['inputreport','输入检查'],['bom','BOM 数组'],['bomrows','BOM 原始行'],['model','模型数据'],['source','原 PDF'],['log','运行日志']])if(j.links[key])link(actions,text,j.links[key],key==='topology');
-    if(!['running','queued'].includes(j.status)){const retry=node('button','重新处理',actions);retry.type='button';retry.addEventListener('click',async()=>{retry.disabled=true;try{await request(`/api/jobs/${j.id}/retry`,{method:'POST',headers:{'X-Upload-Token':session.token}});error('');await refresh();}catch(e){error(e.message);retry.disabled=false;}});}
+    renderDrawingActions(actions,j,{includeAssembly:true,showUnavailable:false,onRetry:retryJob});
+    if(w?.assembly)node('p',w.assembly.message,card,'job-message issue');
   }
 }
-async function refresh(){clearTimeout(pollTimer);try{const {jobs}=await request('/api/jobs');renderJobs(jobs);if($('error').dataset.network==='true'){error('');delete $('error').dataset.network;}pollTimer=setTimeout(refresh,jobs.some(j=>['queued','running'].includes(j.status))?1500:10000);}catch(e){error(`无法读取本地记录：${e.message} 可点击“刷新记录”重试。`);$('error').dataset.network='true';pollTimer=setTimeout(refresh,10000);}}
+async function refresh(){clearTimeout(pollTimer);try{const [{jobs},{assemblies}]=await Promise.all([request('/api/jobs'),request('/api/assemblies')]);renderJobs(jobs);renderAssemblies(assemblies,jobs);if($('error').dataset.network==='true'){error('');delete $('error').dataset.network;}pollTimer=setTimeout(refresh,jobs.some(j=>['queued','running'].includes(j.status))?2500:10000);}catch(e){error(`无法读取本地记录：${e.message} 可点击“刷新记录”重试。`);$('error').dataset.network='true';pollTimer=setTimeout(refresh,10000);}}
 function uploadFile(file,index,total){return new Promise((resolve,reject)=>{const xhr=new XMLHttpRequest();xhr.open('POST','/api/jobs');xhr.setRequestHeader('Content-Type','application/pdf');xhr.setRequestHeader('X-File-Name',encodeURIComponent(file.name));xhr.setRequestHeader('X-Upload-Token',session.token);xhr.timeout=120000;
   xhr.upload.onprogress=e=>{if(e.lengthComputable){$('upload-progress').value=e.loaded/e.total*100;$('upload-status').textContent=`上传 ${index}/${total}：${file.name} · ${Math.round(e.loaded/e.total*100)}%`;}};
   xhr.onload=()=>{let data;try{data=JSON.parse(xhr.responseText);}catch{return reject(Error('上传响应无效，请检查本地服务。'));}if(xhr.status<200||xhr.status>=300)return reject(Error(data.error||`上传失败 HTTP ${xhr.status}`));resolve(data);};
@@ -39,6 +60,7 @@ function uploadFile(file,index,total){return new Promise((resolve,reject)=>{cons
 });}
 $('pick').addEventListener('click',e=>{e.stopPropagation();$('files').click();});$('drop-zone').addEventListener('click',()=>$('files').click());$('drop-zone').addEventListener('keydown',e=>{if(e.target===$('drop-zone')&&['Enter',' '].includes(e.key)){e.preventDefault();$('files').click();}});$('files').addEventListener('change',e=>selectFiles(e.target.files));
 for(const event of ['dragenter','dragover'])$('drop-zone').addEventListener(event,e=>{e.preventDefault();$('drop-zone').classList.add('drag');});for(const event of ['dragleave','drop'])$('drop-zone').addEventListener(event,e=>{e.preventDefault();$('drop-zone').classList.remove('drag');});$('drop-zone').addEventListener('drop',e=>selectFiles(e.dataTransfer.files));
-$('upload').addEventListener('click',async()=>{if(busy||!selected.length)return;busy=true;$('upload').disabled=true;$('pick').disabled=true;error('');let uploaded=0;try{session=await request('/api/session');for(const file of selected){if(!/\.pdf$/i.test(file.name)||!file.size||file.size>session.max_upload_bytes)throw Error(`${file.name}：请选择不超过 100 MB 的 PDF 文件。`);}$('upload-progress').hidden=false;for(const [i,file] of selected.entries()){await uploadFile(file,i+1,selected.length);uploaded++;await refresh();}$('upload-status').textContent=`已保存 ${uploaded} 张图纸，可在下方查看进度和结果。`;selected=[];$('files').value='';}catch(e){error(`${uploaded?`已保存 ${uploaded} 张。`:''}${e.message}`);selected=selected.slice(uploaded);}finally{busy=false;$('upload').disabled=!selected.length;$('pick').disabled=false;}});
+$('upload').addEventListener('click',async()=>{if(busy||!selected.length)return;busy=true;$('upload').disabled=true;$('pick').disabled=true;error('');let uploaded=0,ids=[];try{session=await request('/api/session');if(selected.length>30)throw Error('每个装配项目最多选择 30 张图纸。');for(const file of selected){if(!/\.pdf$/i.test(file.name)||!file.size||file.size>session.max_upload_bytes)throw Error(`${file.name}：请选择不超过 100 MB 的 PDF 文件。`);}$('upload-progress').hidden=false;for(const [i,file] of selected.entries()){const job=await uploadFile(file,i+1,selected.length);ids.push(job.id);uploaded++;await refresh();}await createAssembly(ids);await refresh();$('upload-status').textContent=`已保存 ${uploaded} 张图纸并创建联合装配项目，可在下方查看进度和结果。`;selected=[];$('files').value='';}catch(e){error(`${uploaded?`已保存 ${uploaded} 张，可在记录中勾选后联合装配。`:''}${e.message}`);selected=selected.slice(uploaded);for(const id of ids)assemblySelection.add(id);}finally{busy=false;$('upload').disabled=!selected.length;$('pick').disabled=false;}});
+$('combine').onclick=async()=>{if(!assemblySelection.size)return error('请先勾选需要联合装配的图纸。');try{const project=await createAssembly([...assemblySelection]);location.assign(project.url);}catch(e){error(e.message);}};
 $('refresh').addEventListener('click',async()=>{try{session=await request('/api/session');error('');await refresh();}catch(e){error(e.message);}});
 (async()=>{try{session=await request('/api/session');await refresh();window.studioReady=true;}catch(e){error(`本地工作台读取失败：${e.message}`);}})();

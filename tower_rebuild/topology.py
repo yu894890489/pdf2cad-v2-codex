@@ -170,6 +170,7 @@ def topology(run_dir, review_path=None):
     geometry_hash=digest({"views":[{"id":v["id"],"primitive_ids":sorted(v["primitive_ids"])} for v in views],
                           "bands":bands,"contours":contours,"holes":holes,
                           "overlap_code_sha256":file_digest(Path(__file__).with_name("topology_overlap.py")),
+                          "association_code_sha256":file_digest(Path(__file__).with_name("topology_features.py")),
                           "observations":[{k:p[k] for k in ("id","mark","callout_id")} for p in members+plates]})
     if review and review.get("geometry_sha256")!=geometry_hash:
         raise ValueError("Derived geometry changed; regenerate review from current geometry before confirming associations")
@@ -198,6 +199,7 @@ def topology(run_dir, review_path=None):
         issue("overlap_extent_candidate",[m["id"] for m in members if m["view_id"]==vid and m["overlap_recovery"]["applied"]],"已按原生边线、孔排与 BOM 补回重叠段；原识别段单独保存，完整端点仍为候选，位置余量见 overlap_recovery。",vid)
         issue("overlap_extent_partial",[m["id"] for m in members if m["view_id"]==vid and m["overlap_recovery"]["status"]=="partial_overlap_recovered_candidate"],"目前只补回有原生边线支持的部分，仍有缺长未解决；不能将此候选当作完整杆件。",vid)
         issue("native_extent_bom_conflict",[m["id"] for m in members if m["view_id"]==vid and m["overlap_recovery"].get("bom_conflict")],"按两侧隐藏轮廓及孔位接续了原图杆身，但投影全长与圈号对应 BOM 冲突；件号及尺寸需核对，BOM 原值未改写。",vid)
+        issue("member_band_reassociated",[m["id"] for m in members if m["view_id"]==vid and m.get("association_recheck")],"根据独立比例与 BOM 角钢肢宽，重新关联了相邻轮廓；原候选与依据已保留，杆端仍需单独校核。",vid)
         issue("overlap_extent_unresolved",[m["id"] for m in members if m["view_id"]==vid and m["overlap_recovery"]["status"] in {"extent_unresolved","ambiguous_end_allocation","hole_span_conflicts_with_bom","native_extent_alternative_without_scale"}],"这些杆件尚不能唯一确定板下延伸范围；未把板边当作已确认杆端，也未用 BOM 均分缺长。",vid)
         issue("plate_boundary_unconfirmed",[p["id"] for p in plates if p["view_id"]==vid and p["status"]!="reviewed_2d_association"],"连接板件号已查 BOM，轮廓及所属接点仍需核对。",vid)
         issue("hole_owner_unconfirmed",[h["id"] for h in holes if h["view_id"]==vid],"圆形投影可能为孔或螺栓符号；所属零件、孔径和孔距需要图纸证据，不能用 PDF 点换算。",vid)
