@@ -239,12 +239,20 @@ def build_preview(run_dir):
                'unresolved_small_arc_ids':unresolved_arcs,'views':summaries,'issues':all_issues,'dimension_findings':audit['findings'],
                'completeness_verified':False,'notes':['观察数不是实物数量，重复件号不能作为完整数量验收。',
                  '未归属小圆和短圆弧仍需核对，不能据已识别孔数宣称孔位识别完整。']+result['display_assumptions']}
+    if audit.get('schematic'):
+        from .schematic_audit import apply_schematic_corrections
+        apply_schematic_corrections(result, audit['schematic'], data['geometry'])
+        for name in ('schematic/mapping.json','schematic/report.json'):
+            result['input_files'][name] = file_digest(site/name)
     write_json(top/'model-preview.json',result);write_json(top/'final-check.json',inventory)
     # Install local modules/assets; never require a CDN or a network model call.
     shutil.copytree(Path(__file__).parent/'topology_web',top,dirs_exist_ok=True)
     index=top/'index.html';html=index.read_text(encoding='utf-8')
     if 'id="audit-link"' not in html:html=html.replace('href="graph.json" download','id="audit-link" href="../audit/">尺寸初审</a> · <a href="graph.json" download',1)
     index.write_text(html,encoding='utf-8')
+    if audit.get('schematic'):
+        from .schematic_audit import add_link
+        add_link(index)
     lines=['# 建模前识别检查','',f'BOM 角钢件号 {inventory["bom_angle_marks"]}，已观察到 {len(observed)}；缺失件号：{missing_members}。',
            f'连接板缺失件号：{missing_plates}；未归属小圆 {len(unassigned_circles)} 个，未完整归组小圆弧 {len(unresolved_arcs)} 条。','',
            '| 结构面 | 角钢模型 / 杆件观察 | 杆端未完整 | 板形 / 板件观察 | 孔位投影 / 明确孔径 |','| --- | --- | ---: | --- | --- |']

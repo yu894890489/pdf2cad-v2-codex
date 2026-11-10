@@ -1,8 +1,10 @@
 // Shared by the upload workbench and the assembly viewer.
 const entries=[
   ['assembly','打开多面装配'],['automaticassembly','自动装配与补全报告'],
+  ['finalbom','最终模型 BOM',true],
+  ['partdrawings','零件放样 DWG',true],
   ['topology','打开图纸与三维'],['final','全流程终检'],['ocr','OCR 文字与笔画',true],
-  ['tables','BOM 与图元'],['audit','尺寸初审'],['modelaudit','三维尺寸复核'],
+  ['tables','BOM 与图元'],['audit','尺寸初审'],['schematic','单线图尺寸检查',true],['modelaudit','三维尺寸复核'],
   ['report','检查报告'],['inputreport','输入检查'],['bom','BOM 数组'],
   ['bomrows','BOM 原始行',true],['bomcheck','BOM 检查',true],
   ['model','模型数据'],['source','原 PDF'],['log','运行日志']

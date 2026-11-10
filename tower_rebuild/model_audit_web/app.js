@@ -1,12 +1,13 @@
 const $=id=>document.getElementById(id),el=(tag,text,parent)=>{const e=document.createElement(tag);if(text!==undefined)e.textContent=text;if(parent)parent.append(e);return e;};
-const fmt=v=>v==null?'待定':v.toFixed(2),names={difference:'尺寸差异',within_diagnostic_bound:'阈值内相容',pending:'待定',input_reused:'输入复用',blank_reference:'板坯参考'},kinds={member_bom:'杆件全长 / BOM',member_initial_audit:'杆件全长 / 初审换算',member_annotation:'杆件全长 / 杆旁标注',node_span:'模型参考轴线交点跨度',member_section:'角钢截面',plate_envelope:'板件包络',plate_thickness:'板厚',hole_diameter:'孔径',hole_distance:'孔中心距'};
+const fmt=v=>v==null?'待定':v.toFixed(2),names={reference_only:'塔身/组合尺寸参考',difference:'尺寸差异',within_diagnostic_bound:'阈值内相容',pending:'待定',input_reused:'输入复用',blank_reference:'板坯参考'},kinds={schematic_overall:'单线图整体尺寸链',member_bom:'杆件全长 / BOM',member_initial_audit:'杆件全长 / 初审换算',member_annotation:'杆件全长 / 杆旁标注',node_span:'模型参考轴线交点跨度',member_section:'角钢截面',plate_envelope:'板件包络',plate_thickness:'板厚',hole_diameter:'孔径',hole_distance:'孔中心距'};
 let report;
 async function read(url){const r=await fetch(url,{cache:'no-store',signal:AbortSignal.timeout(20000)});if(!r.ok)throw Error(`${url}：HTTP ${r.status}`);return r;}
 function selected(r){return (!$('view').value||r.view_id===$('view').value)&&(!$('search').value||JSON.stringify([r.mark,r.object_id,r.label,r.view_title]).includes($('search').value.trim()));}
 function evidence(r,cell){
   el('div',r.note,cell);
   const d=r.dependency;
-  if(d.reference_used_in_scale.length)el('div','该尺寸参与本面比例标定；数值接近属于共用依据。',cell);
+  if(d.reference_used_in_scale?.length)el('div','该尺寸参与本面比例标定；数值接近属于共用依据。',cell);
+  if(d.reference_used_in_correction)el('div','该单线图尺寸参与模型修正，吻合属于共用依据。',cell);
   if(d.bom_scale_reused)el('div','本面比例使用了 BOM，不能作为独立验证。',cell);
   if(r.geometry?.uses_axis_extension)el('div','使用参考轴线延长线交点，非实体接触点。',cell);
   if(r.candidate_check)el('div',`初审建议 ${fmt(r.candidate_check.reference_mm)}；模型差值 ${fmt(r.candidate_check.delta_mm)} mm。${r.candidate_note}`,cell);

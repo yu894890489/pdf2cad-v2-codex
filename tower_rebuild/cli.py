@@ -17,6 +17,7 @@ def main(argv=None):
     command.add_argument('--out', type=Path, required=True)
     command.add_argument('--table-regions', type=Path)
     command.add_argument('--review', type=Path)
+    command.add_argument('--schematic-map', type=Path, help='已核对的单线图尺寸与件号、端部贡献对应 JSON')
     command.add_argument('--title')
     command.add_argument('--config', type=Path, help='完整流程配置，含诊断阈值和可选视觉复核')
     command = sub.add_parser('studio', help='启动本地图纸上传、处理进度和历史结果页面')
@@ -28,6 +29,10 @@ def main(argv=None):
     command.add_argument('--probe-vision', action='store_true')
     command.add_argument('--out', type=Path)
     command = sub.add_parser('final-check', help='汇总识别、拓扑、尺寸和三维的全流程终检')
+    command.add_argument('--out', type=Path, required=True)
+    command = sub.add_parser('final-bom', help='从已保存的最终装配导出原图 BOM 和修正后的模型长度')
+    command.add_argument('--out', type=Path, required=True)
+    command = sub.add_parser('part-drawings', help='从已保存装配按规格、长度及板形生成独立零件放样 DWG')
     command.add_argument('--out', type=Path, required=True)
     command = sub.add_parser('assemble', help='对已解析图纸自动组合结构面、反算补全并复核尺寸')
     command.add_argument('--out', type=Path, required=True)
@@ -42,6 +47,7 @@ def main(argv=None):
     command.add_argument("--review", type=Path)
     command = sub.add_parser("audit", help="读取尺寸示意图并交叉检查结构方向、杆旁标注与 BOM")
     command.add_argument("--out", type=Path, required=True)
+    command.add_argument('--schematic-map', type=Path)
     command = sub.add_parser("preview", help="检查识别完整性并生成各结构面的基础三维预览")
     command.add_argument("--out", type=Path, required=True)
     command = sub.add_parser("model-audit", help="从模型几何重新测量并与原尺寸初审和 BOM 比对")
@@ -79,6 +85,22 @@ def main(argv=None):
             from .studio import serve_studio
             serve_studio(args.root, args.port, args.config)
             return 0
+        if args.command == 'final-bom':
+            from .final_bom import publish_saved_run_bom
+            report = publish_saved_run_bom(args.out)
+            print(f"BOM: {report['counts']['rows']} rows, {report['counts']['attention']} need attention -> {args.out / 'site/final-bom'}")
+            return 0
+        if args.command == 'part-drawings':
+            import uuid
+            from .final_bom import publish_saved_run_bom
+            from .part_drawings import publish_part_drawings
+            bom = publish_saved_run_bom(args.out)
+            snapshot = read_json(args.out/'site/assembly/assembly.json')
+            destination = args.out/'site/part-drawings'/uuid.uuid4().hex
+            report = publish_part_drawings(snapshot, bom, destination,
+                progress=lambda v: print(f"[DWG] {v['completed']}/{v['total']} verified={v['verified']}", flush=True))
+            print(f"{report['status']} -> {destination}")
+            return 0 if report['status']=='complete' else 2
         if args.command == 'doctor':
             from .doctor import doctor
             import json
@@ -115,7 +137,7 @@ def main(argv=None):
             return 2
         if args.command == 'process':
             from .workflow import process_drawing
-            result = process_drawing(args.pdf, args.out, args.table_regions, args.review, args.title, args.config)
+            result = process_drawing(args.pdf, args.out, args.table_regions, args.review, args.title, args.config, args.schematic_map)
             return 1 if result['status'] == 'failed' else 2
         if args.command == "decompose":
             from .decomposition import decompose
@@ -127,7 +149,7 @@ def main(argv=None):
             return 2 if result["status"] == "needs_review" else 0
         if args.command == "audit":
             from .dimension_audit import audit_dimensions
-            audit_dimensions(args.out)
+            audit_dimensions(args.out, args.schematic_map)
             return 2
         if args.command == "preview":
             from .model_preview import build_preview

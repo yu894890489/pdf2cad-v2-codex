@@ -4,7 +4,7 @@
 <script type="importmap">{"imports":{"three":"/assembly-assets/three.module.js"}}</script>
 <script type="module" src="/assembly-assets/app.js"></script></head>
 <body>
-<header><a href="/">← 图纸工作台</a><div><strong id="title">横担层装配</strong><small id="save-state">正在读取装配…</small></div><button id="add">补充图纸</button><input type="file" id="pdfs" accept=".pdf,application/pdf" multiple hidden></header>
+<header><a href="/">← 图纸工作台</a><div><strong id="title">横担层装配</strong><small id="save-state">正在读取装配…</small></div><a id="final-bom" target="_blank" rel="noopener">当前模型 BOM</a><a id="part-drawings" target="_blank" rel="noopener">零件放样 DWG</a><button id="add">补充图纸</button><input type="file" id="pdfs" accept=".pdf,application/pdf" multiple hidden></header>
 <div id="error" role="alert" hidden></div>
 <section id="drawing-tools" aria-label="图纸解析与审核">
 <div class="drawing-heading"><strong>图纸解析与审核</strong><label>当前图纸 <select id="drawing-source" aria-label="当前查看结果的图纸"></select></label><span id="drawing-status" role="status"></span></div>

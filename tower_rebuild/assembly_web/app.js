@@ -5,6 +5,9 @@ import {renderDrawingActions} from '/assembly-assets/drawing-actions.js';
 
 const $=id=>document.getElementById(id), aid=location.pathname.split('/')[2];
 const staticMode=window.ASSEMBLY_STATIC===true;
+document.getElementById('final-bom').href=staticMode?'../final-bom/':`/assemblies/${aid}/final-bom/`;
+document.getElementById('part-drawings').href=`/assemblies/${aid}/part-drawings/`;
+document.getElementById('part-drawings').hidden=staticMode;
 let data, session, selected, selectedMemberKey=null, busy=false, timer, view, preview=null;
 let drawingSource=null,drawingRequest=0;
 const drawingJobs=new Map();
@@ -67,6 +70,8 @@ async function renderDrawingToolbar(){
   const jobId=hosted?hosted[1]:source.id;
   const cached=drawingJobs.get(jobId)||(!staticMode&&source.links?{job:source}:null);
   const draw=job=>{
+    if(job&&!staticMode)job={...job,links:{...job.links,finalbom:`/assemblies/${aid}/final-bom/`,partdrawings:`/assemblies/${aid}/part-drawings/`}};
+    if(job&&staticMode)job={...job,links:{...job.links,finalbom:'../final-bom/'}};
     renderDrawingActions($('drawing-actions'),job,{onRetry:staticMode?null:retryDrawing});
     $('drawing-status').textContent=job?job.error||(['running','queued'].includes(job.status)?'正在处理；结果生成后自动更新。':'按钮对应当前图纸；选择其他结构面会同步切换。'):'正在读取处理结果…';
     $('drawing-actions').dataset.sourceId=source.id;
@@ -184,6 +189,10 @@ function renderAutomaticPipeline(){
   const p=data.automatic_pipeline,box=$('automatic-pipeline-details');box.replaceChildren();
   $('automatic-pipeline-status').textContent=p?.message||'上传新图纸后自动执行。已有手动连接会保留；也可点击按钮对尚未定位的面反算补全。';
   if(!p)return;
+  if(p.schematic_checks?.length){
+    const block=n('details',undefined,box);n('summary',`${p.schematic_checks.length} 条单线图整体尺寸检查`,block);
+    for(const row of p.schematic_checks)n('p',`件号 ${row.marks.join('/')||'—'} · 单线图 ${fmt(row.reference_mm)} mm / 装配模型 ${row.measured_mm==null?'待定':fmt(row.measured_mm)} mm · ${row.status==='reference_only'?'塔身/组合尺寸参考':row.status==='difference'?'尺寸不一致':row.status==='pending'?'对应或端部基准待定':'当前基准下吻合'}`,block,'note');
+  }
   if(p.source_results){
     const groups=n('div',undefined,box);
     for(const group of [...p.source_results].sort((a,b)=>b.counts.located_face_count-a.counts.located_face_count)){

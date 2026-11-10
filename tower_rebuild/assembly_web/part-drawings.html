@@ -1,0 +1,8 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>零件放样 DWG</title>
+<style>body{font:16px system-ui;margin:28px;color:#173957;background:#f7f9fc;max-width:1400px}h1{font-size:27px}a{color:#175bab;margin-right:18px}button{background:#234b70;color:white;border:0;border-radius:5px;padding:12px 20px;cursor:pointer}button:disabled{opacity:.5;cursor:wait}.note{line-height:1.8}#error{color:#9b3000}progress{width:100%;max-width:650px;height:22px}iframe{width:100%;height:75vh;border:1px solid #ccd5df;background:white;margin-top:20px}</style>
+<script type="module" src="/assembly-assets/part-drawings.js"></script></head>
+<body><nav><a id="assembly">返回模型装配</a><a id="bom">最终模型 BOM</a></nav><h1>按模型拆分零件放样图</h1>
+<p class="note">按图纸、件号、规格、最终长度及轮廓/孔位分别出图。角钢提供两肢侧视图和 L 形截面；连接板提供实际多边形、板厚及有标注支持的模型孔位。模型空间为毫米、1:1，输出 DWG 2018。</p>
+<p class="note">端部切角、火曲、杆件孔所属肢面等未建模内容会注明待核对。没有有效模型的零件列入未生成清单。原图数量保留，尚未分配到每种长度变体。</p>
+<button id="generate" disabled>生成当前模型的 DWG 放样图</button><p id="status" role="status">正在读取模型版本…</p><progress id="progress" hidden></progress><p id="error" role="alert" hidden></p><p id="stale" hidden>模型已经变化，下面是此前保存的放样结果，请重新生成以匹配当前模型。</p><p><a id="download" hidden download>下载全部 DWG</a><a id="result" hidden target="_blank" rel="noopener">打开逐件下载清单</a></p><iframe id="preview" title="逐件放样结果" hidden></iframe></body></html>

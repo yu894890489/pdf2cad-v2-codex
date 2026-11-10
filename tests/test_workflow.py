@@ -111,6 +111,33 @@ def call(url, data=None, headers=None):
         return json.loads(response.read())
 
 
+def test_final_bom_http_tracks_current_model_and_exports_csv(studio):
+    from test_assembly_projects import add_source
+    base, store = studio
+    add_source(store, 'bom-test')
+    project = store.assemblies.create(['bom-test'])
+    aid = project['id']; url = base + f'/assemblies/{aid}/final-bom/'
+    first = call(url + 'final-bom.json')
+    assert first['rows'][0]['model_lengths_mm'] == [1000]
+    before = store.assemblies.snapshot(aid, True)
+    with urlopen(url + 'final-bom.csv', timeout=5) as response:
+        assert response.headers['Cache-Control'] == 'no-store'
+        assert 'attachment' in response.headers['Content-Disposition']
+        assert '是否需要人工关注' in response.read().decode('utf-8-sig')
+    assert store.assemblies.snapshot(aid, True)['scene'] == before['scene']
+    store.assemblies.mutate(aid, {'action': 'scale', 'revision': before['revision'],
+        'face_id': before['faces'][0]['id'], 'mm_per_pt': 2})
+    second = call(url + 'final-bom.json')
+    assert second['rows'][0]['model_lengths_mm'] == [2000]
+    assert second['basis_signature'] != first['basis_signature']
+    with urlopen(url, timeout=5) as response:
+        assert '最终模型 BOM' in response.read().decode('utf8')
+    for suffix in ('secrets.json', '../project.json'):
+        with pytest.raises(HTTPError) as error:
+            urlopen(url + suffix, timeout=5)
+        assert error.value.code == 404
+
+
 def test_upload_requires_session_and_rejects_non_pdf(studio):
     base, store = studio
     token = call(base + '/api/session')['token']

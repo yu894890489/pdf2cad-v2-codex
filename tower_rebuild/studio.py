@@ -12,7 +12,7 @@ import subprocess
 import sys
 import uuid
 
-from .io import read_json, write_json
+from .io import read_json, write_json, file_digest
 from .server import Handler, LocalHTTPServer
 from .workflow import now
 from .workflow_settings import load_workflow_settings
@@ -42,6 +42,8 @@ class JobStore:
                 write_json(file, job)
             self.jobs[job['id']] = job
         self.assemblies = AssemblyProjects(self)
+        from .part_drawing_jobs import PartDrawingJobs
+        self.part_drawings = PartDrawingJobs(self)
 
     def save(self, job):
         job['updated_at'] = now()
@@ -83,7 +85,8 @@ class JobStore:
                     if self.closing:
                         return
                     self.process = subprocess.Popen(
-                        [sys.executable, '-m', 'tower_rebuild', 'process', str(folder / 'source.pdf'), '--out', str(folder / 'run'), '--title', job['name'], '--config', str(folder / 'workflow-config.json')],
+                        [sys.executable, '-m', 'tower_rebuild', 'process', str(folder / 'source.pdf'), '--out', str(folder / 'run'), '--title', job['name'], '--config', str(folder / 'workflow-config.json')]
+                        + (['--schematic-map',str(folder/'schematic-map.json')] if (folder/'schematic-map.json').exists() else []),
                         stdout=log, stderr=subprocess.STDOUT,
                         creationflags=getattr(subprocess, 'CREATE_NO_WINDOW', 0))
                     child = self.process
@@ -121,7 +124,26 @@ class JobStore:
             previous_config = self.root / jid / 'workflow-config.json'
             if previous_config.exists():
                 shutil.copy2(previous_config, folder / 'workflow-config.json')
+            previous_mapping=self.root/jid/'schematic-map.json'
+            if previous_mapping.exists():shutil.copy2(previous_mapping,folder/'schematic-map.json')
             return self.submit(new_id, old['name'], retry_of=jid)
+
+    def review_schematic(self, jid, mapping):
+        with self.lock:
+            old=self.jobs[jid]
+            if old['status'] in ACTIVE:raise ValueError('图纸仍在处理中。')
+            if not isinstance(mapping,dict) or not isinstance(mapping.get('bindings'),list) or not 1<=len(mapping['bindings'])<=512:
+                raise ValueError('请提供至少一条已核对的单线图对应记录。')
+            json.dumps(mapping,allow_nan=False)
+            report=read_json(self.root/jid/'run/site/schematic/report.json')
+            if any(mapping.get(k)!=report[k] for k in ('source_sha256','input_sha256')) or file_digest(self.root/jid/'source.pdf')!=report['source_sha256']:
+                raise ValueError('对应记录已过期或属于其他图纸，请重新下载模板。')
+            new_id,folder=self.reserve(old['name'])
+            shutil.copy2(self.root/jid/'source.pdf',folder/'source.pdf')
+            config=self.root/jid/'workflow-config.json'
+            if config.exists():shutil.copy2(config,folder/'workflow-config.json')
+            write_json(folder/'schematic-map.json',mapping)
+            return self.submit(new_id,old['name'],retry_of=jid)
 
     def snapshot(self, jid):
         with self.lock:
@@ -134,10 +156,14 @@ class JobStore:
             if related:
                 aid = max(related,key=lambda r:r['created_at'])['id']
                 job['links']['assembly'] = f'/assemblies/{aid}/'
+                job['links']['finalbom'] = f'/assemblies/{aid}/final-bom/'
+                job['links']['partdrawings'] = f'/assemblies/{aid}/part-drawings/'
             site = folder / 'run/site'
+            if 'finalbom' not in job['links'] and (site/'assembly/assembly.json').is_file() and job['status'] not in ACTIVE:
+                job['links']['finalbom'] = f'/results/{jid}/final-bom/'
             for key, target in [('ocr', 'ocr/index.html'), ('tables', 'index.html'), ('topology', 'topology/index.html'),
                                 ('automaticassembly','assembly/index.html'),
-                                ('audit', 'audit/index.html'), ('modelaudit', 'model-audit/index.html'), ('final', 'final/index.html'), ('bom', 'tables/bom.json'),
+                                ('audit', 'audit/index.html'), ('schematic', 'schematic/index.html'), ('modelaudit', 'model-audit/index.html'), ('final', 'final/index.html'), ('bom', 'tables/bom.json'),
                                 ('bomcheck', 'tables/bom-check.json'), ('bomrows', 'tables/bom-observations.json'),
                                 ('model', 'topology/model-preview.json'), ('checks', 'topology/final-check.json')]:
                 if (site / target).is_file() and job['status'] not in ACTIVE:
@@ -167,6 +193,7 @@ class JobStore:
         if child:
             child.wait(timeout=15)
         self.executor.shutdown(wait=True, cancel_futures=True)
+        self.part_drawings.close()
 
 
 class StudioHandler(Handler):
@@ -193,6 +220,8 @@ class StudioHandler(Handler):
             mime = 'text/plain; charset=utf-8'
         self.send_header('Content-Type', mime)
         self.send_header('Content-Length', str(file.stat().st_size))
+        if file.parent.name == 'final-bom':
+            self.send_header('Cache-Control', 'no-store')
         if download:
             self.send_header('Content-Disposition', f'attachment; filename="{file.name}"')
         self.end_headers()
@@ -213,8 +242,32 @@ class StudioHandler(Handler):
                 self.respond_json({'jobs': self.store.listing()})
             elif path == '/api/assemblies':
                 self.respond_json({'assemblies': self.store.assemblies.listing()})
+            elif len(bits) == 4 and bits[:2] == ['api','assemblies'] and bits[3] == 'part-drawings':
+                self.respond_json(self.store.part_drawings.status(bits[2]))
+            elif len(bits) in {3,5} and bits[0] == 'assemblies' and bits[2] == 'part-drawings':
+                if bits[1] not in self.store.assemblies.records:raise KeyError(bits[1])
+                if len(bits) == 3:
+                    if not path.endswith('/'):
+                        self.send_response(302);self.send_header('Location',path+'/');self.end_headers()
+                    else:
+                        self.send_file(Path(__file__).with_name('assembly_web')/'part-drawings.html')
+                else:
+                    artifact = self.store.part_drawings.artifact(bits[1], bits[3], bits[4])
+                    self.send_file(artifact, download=artifact.suffix in {'.dwg','.dxf','.zip'})
             elif len(bits) == 3 and bits[:2] == ['api','assemblies']:
                 self.respond_json(self.store.assemblies.snapshot(bits[2],full=True))
+            elif len(bits) in {3,4} and bits[0] == 'assemblies' and bits[2] == 'final-bom':
+                from .final_bom import FILES
+                filename = bits[3] if len(bits) == 4 else 'index.html'
+                if filename not in FILES:
+                    self.send_error(404)
+                elif len(bits) == 3 and not path.endswith('/'):
+                    self.send_response(302); self.send_header('Location',path+'/'); self.end_headers()
+                else:
+                    with self.store.lock:
+                        self.store.assemblies.export_final_bom(bits[1])
+                        self.send_file(self.store.assemblies.root/bits[1]/'final-bom'/filename,
+                                       download=filename.endswith('.csv'))
             elif len(bits) == 2 and bits[0] == 'assemblies':
                 if bits[1] not in self.store.assemblies.records:raise KeyError(bits[1])
                 if not path.endswith('/'):
@@ -235,7 +288,7 @@ class StudioHandler(Handler):
                     else:
                         self.send_file(self.store.assemblies.root/bits[1]/bits[2])
             elif len(bits) == 2 and bits[0] == 'assembly-assets':
-                if bits[1] in {'app.js','style.css','drawing-actions.js'}:
+                if bits[1] in {'app.js','style.css','drawing-actions.js','part-drawings.js'}:
                     self.send_file(Path(__file__).with_name('assembly_web')/bits[1])
                 elif bits[1] == 'member-labels.js':
                     self.send_file(Path(__file__).with_name('topology_web')/bits[1])
@@ -257,6 +310,15 @@ class StudioHandler(Handler):
             elif len(bits) >= 2 and bits[0] == 'results':
                 jid = bits[1]
                 if jid not in self.store.jobs:raise KeyError(jid)
+                if len(bits) in {3,4} and bits[2] == 'final-bom':
+                    from .final_bom import FILES, publish_saved_run_bom
+                    if (bits[3] if len(bits) == 4 else 'index.html') not in FILES:
+                        self.send_error(404)
+                        return
+                    if self.store.jobs[jid]['status'] in ACTIVE:
+                        raise ValueError('图纸正在处理，请在装配结果生成后导出 BOM。')
+                    with self.store.lock:
+                        publish_saved_run_bom(self.store.root/jid/'run')
                 root = (self.store.root / jid / 'run/site').resolve()
                 file = (root / '/'.join(bits[2:])).resolve()
                 if not file.is_relative_to(root):
@@ -295,6 +357,19 @@ class StudioHandler(Handler):
         path = urlsplit(self.path).path
         bits = path.strip('/').split('/')
         try:
+            if len(bits)==4 and bits[:2]==['api','assemblies'] and bits[3]=='part-drawings':
+                length=int(self.headers.get('Content-Length',0))
+                if not 0<length<=1024:raise ValueError('放样请求大小无效。')
+                body=json.loads(self.rfile.read(length))
+                if not isinstance(body,dict) or set(body)!={'revision'} or type(body['revision']) is not int:
+                    raise ValueError('放样请求必须包含当前模型修订号。')
+                self.respond_json(self.store.part_drawings.start(bits[2],body['revision']),202)
+                return
+            if len(bits)==4 and bits[:2]==['api','jobs'] and bits[3]=='schematic-review':
+                length=int(self.headers.get('Content-Length',0))
+                if not 0<length<=1024*1024:raise ValueError('对应记录请求大小无效。')
+                self.respond_json(self.store.review_schematic(bits[2],json.loads(self.rfile.read(length))),202)
+                return
             if bits[:2] == ['api','assemblies'] and len(bits) in {2,3}:
                 length=int(self.headers.get('Content-Length',0))
                 if not 0<length<=2*1024*1024:raise ValueError('装配请求大小无效。')

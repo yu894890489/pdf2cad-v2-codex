@@ -33,6 +33,7 @@ def load_run_source(run, source_id='drawing', name=None, result_url='..', source
     return {'id':source_id,'name':name or pdf.name,'source_sha256':checksum,'status':'needs_review',
             'source_url':source_url,'result_url':result_url,'model_available':True,'pdf_path':str(pdf),
             'model':model,'views':read_json(site/'topology/views.json'),'geometry':read_json(site/'topology/geometry.json'),
+            'schematic':read_json(site/'audit/report.json').get('schematic') if 'audit/report.json' in verified else None,
             'bom':read_json(site/'tables/bom.json') if 'tables/bom.json' in verified else [],
             'member_observations':read_json(site/'topology/members.json') if 'topology/members.json' in verified else []}
 
@@ -215,6 +216,8 @@ def _assembly_result(sources,key,faces,raw,parallel,scene,attempts,reports):
                 {**o,'reason':failures.get(o['face_id']) or (o['reason'] if not o['ready'] else '需要继续核对或已达到本次补全面数上限。')}
                 for o in missing_face_options(faces,scene) if o['face_id'] not in joined],
             'engineering_verified':False,'input_digest':key}
+    from .schematic_audit import assembly_checks
+    report['schematic_checks']=[row for source in sources for row in assembly_checks(source,faces)]
     return {'faces':faces,'raw_faces':raw,'parallel':parallel,'matches':matches,'scene':scene,
             'assessment':assessment,'review':review,'automatic_pipeline':report,'input_digest':key}
 
@@ -231,7 +234,7 @@ def publish_run_assembly(run, options=None, title=None):
         folder='repairs/'+digest(r['target_face_id'])[:16];r['artifact_base']=folder+'/'
         write_review_artifacts(r,None,destination/folder,source_pdf=Path(source['pdf_path']))
         write_corrected_svg(r,destination/folder)
-    metadata={k:v for k,v in source.items() if k not in {'model','geometry','views','bom','member_observations','pdf_path'}}
+    metadata={k:v for k,v in source.items() if k not in {'model','geometry','views','bom','member_observations','pdf_path','schematic'}}
     snapshot={k:v for k,v in result.items() if k!='raw_faces'}
     snapshot.update(id='drawing',title=title or source['name'],revision=1,waiting=False,sources=[metadata],duplicate_jobs=[],
         geometry_revision=digest(result['scene'].get('face_corrections',{})),history={'undo':0,'redo':0},
@@ -239,6 +242,9 @@ def publish_run_assembly(run, options=None, title=None):
         missing_face_candidates=missing_face_candidates(result['faces'],result['scene']),
         missing_face_review=next((r for r in reversed(report['completion_reports']) if r.get('correction',{}).get('status')=='applied_candidate'),None))
     write_json(destination/'assembly.json',snapshot);write_json(destination/'report.json',report)
+    from .final_bom import build_final_bom, publish_final_bom, load_original_tables
+    source.update(load_original_tables(run))
+    publish_final_bom(build_final_bom([source], snapshot), site/'final-bom')
     shutil.copy2(source['pdf_path'],destination/'source.pdf')
     publish_viewer_assets(destination)
     return report
@@ -258,8 +264,8 @@ def publish_viewer_assets(destination):
     (destination/'index.html').write_text(html,encoding='utf8')
     # Portable result links for a saved viewer served outside the upload studio.
     links={'source':'source.pdf','automaticassembly':'./'}
-    for key,path in [('topology','topology/index.html'),('final','final/index.html'),('ocr','ocr/index.html'),
-                     ('tables','index.html'),('audit','audit/index.html'),('modelaudit','model-audit/index.html'),
+    for key,path in [('finalbom','final-bom/index.html'),('topology','topology/index.html'),('final','final/index.html'),('ocr','ocr/index.html'),
+                     ('tables','index.html'),('audit','audit/index.html'),('schematic','schematic/index.html'),('modelaudit','model-audit/index.html'),
                      ('bom','tables/bom.json'),('bomrows','tables/bom-observations.json'),('bomcheck','tables/bom-check.json'),
                      ('model','topology/model-preview.json')]:
         if (destination.parent/path).is_file():links[key]='../'+path.replace('index.html','')

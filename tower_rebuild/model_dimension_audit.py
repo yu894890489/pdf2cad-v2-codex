@@ -232,6 +232,15 @@ def compare_model(model, audit, tolerance_mm=3.0):
                     row['candidate_check'] = numeric_check(value, finding['recommended_mm'], tolerance_mm, edge.get('rounding_mm', 0))
                     row['candidate_note'] = '初审建议值保留为候选；模型复用原投影和部分尺寸，不据模型吻合自动修订图纸。'
 
+    if audit.get('schematic'):
+        from .schematic_audit import model_checks
+        for item in model_checks(model, audit['schematic'], tolerance_mm):
+            rows.append({**item, 'id': f'model_check_{len(rows)+1:04d}',
+                         'object_id':item['dimension_id'], 'view_title':views.get(item['view_id'],{}).get('title','单线图'),
+                         'label':'单线图整体尺寸链', 'mark':'/'.join(item.get('marks',[])),
+                         'note':'单线图为整体基准；必须计入有依据的端部贡献和搭接扣减。',
+                         'dependency':{'independent_engineering_validation':False,
+                                       'reference_used_in_correction':item.get('reference_reused_for_correction',False)}})
     for view in model['views']:
         selected = [r for r in rows if r['view_id'] == view['view_id']]
         lengths = [r for r in selected if r['kind'] == 'member_bom' and r['measured_mm'] and r['reference_mm']]
@@ -276,6 +285,14 @@ def audit_model_dimensions(run_dir, tolerance_mm=3.0):
     report['input_files'] = {name: file_digest(site / name) for name in ('topology/model-preview.json', 'audit/report.json')}
     write_json(target / 'report.json', report)
     shutil.copytree(Path(__file__).parent / 'model_audit_web', target, dirs_exist_ok=True)
+    if audit.get('schematic'):
+        from .schematic_audit import model_checks, publish_schematic, add_link, diagnose_structure
+        schematic_rows=model_checks(model,audit['schematic'],tolerance_mm)
+        diagnostics=diagnose_structure(model,audit['schematic'],read_json(site/'topology/geometry.json'))
+        for row in schematic_rows:
+            row['structure_review']=[d for d in diagnostics if d['dimension_id']==row['dimension_id']]
+        publish_schematic(site, audit['schematic'], schematic_rows,model.get('schematic_corrections',[]))
+        add_link(target/'index.html')
     # Install measurement API without changing generated model data or geometry.
     shutil.copy2(Path(__file__).parent / 'topology_web/model-layer.js', site / 'topology/model-layer.js')
     for folder in ('topology', 'audit'):

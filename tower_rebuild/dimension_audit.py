@@ -548,7 +548,7 @@ def inline_annotations(texts,axes,members,bom,excluded):
     return results
 
 
-def audit_dimensions(run_dir):
+def audit_dimensions(run_dir, schematic_mapping=None):
     run_dir=Path(run_dir);site=run_dir/'site';top=site/'topology';dest=site/'audit';dest.mkdir(parents=True,exist_ok=True)
     manifest=read_json(run_dir/'manifest.json');source=Path(manifest['source'])
     if file_digest(source)!=manifest['source_sha256']:raise ValueError('Source PDF changed; regenerate decomposition and topology')
@@ -653,9 +653,13 @@ def audit_dimensions(run_dir):
                            '候选结构边须与原始可见杆段或原生实线延续有实际重叠；只有远处延长线支持时保留待定。此位置检查不确认下料端点。',
                            '推荐值用于初审排查，不自动修改图纸、BOM、杆件件号或三维模型；未关联示意图保留待定。',
                            '当前自动检测覆盖原生矢量中独立闭合、带数字的 3～8 边示意图；断线、连线混杂及扫描图需人工复核，检测数不代表全图已核完。']}
+    from .schematic_audit import prepare_schematic, add_link
+    result['schematic'] = prepare_schematic(run_dir, views, read_json(top/'geometry.json'), texts,
+                                           excluded, members, bom, schematic_mapping)
     write_json(dest/'report.json',result)
     for asset in (Path(__file__).parent/'audit_web').iterdir():
         if asset.is_file():shutil.copy2(asset,dest/asset.name)
+    add_link(dest/'index.html')
     topology_index=top/'index.html'
     html=topology_index.read_text(encoding='utf-8')
     if 'id="audit-link"' not in html:

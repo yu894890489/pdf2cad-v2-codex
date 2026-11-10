@@ -59,6 +59,16 @@ def final_check(run_dir):
     incomplete = [s['id'] for s in data['audit']['span_bom_checks'] if s.get('computed_cut_length_mm') is None]
     check('initial_audit', '尺寸示意图与下料长度初审', 'fail' if findings else 'pending' if incomplete else 'pass',
           f'{len(findings)} 项初审疑点，{len(incomplete)} 条跨度尚缺完整端部换算依据。', '../audit/', [f['id'] for f in findings])
+    schematic = data['audit'].get('schematic')
+    if schematic is not None:
+        sr = [r for r in comparison['rows'] if r['kind']=='schematic_overall']
+        conflicts = [r['id'] for r in sr if r['status']=='difference']
+        bom_conflicts = sum(r['status']=='difference' for r in schematic['rows'])
+        unresolved = sum(r['status']=='pending' for r in sr)
+        check('schematic_dimensions','单线图整体尺寸、端部尺寸链与模型',
+              'fail' if conflicts or bom_conflicts else 'pending' if unresolved or not sr else 'pass',
+              f'{len(sr)} 条整体尺寸，{bom_conflicts} 条 BOM 尺寸链差异，{len(conflicts)} 条模型差异，{unresolved} 条对应/端部基准待定；修正后的吻合不计为独立验证。',
+              '../schematic/',conflicts)
     length_rows = [r for r in comparison['rows'] if r['kind'] in {'member_bom', 'member_initial_audit', 'node_span'}]
     differences = [r['id'] for r in length_rows if r['status'] == 'difference']
     pending = sum(r['status'] == 'pending' for r in length_rows)
@@ -78,6 +88,11 @@ def final_check(run_dir):
         names['assembly']='assembly/report.json'
         check('assembly','各结构面的空间装配','pending',assembly['message'],'../assembly/')
         ac=assembly['counts']
+        if assembly.get('schematic_checks'):
+            sc=assembly['schematic_checks'];bad=[r['dimension_id'] for r in sc if r['status']=='difference']
+            waiting=sum(r['status']=='pending' for r in sc)
+            check('assembled_schematic','装配修正后与单线图整体尺寸复查','fail' if bad else 'pending' if waiting else 'pass',
+                  f'{len(bad)} 条差异，{waiting} 条对应待定；重新量测装配层的杆件，不沿用修正前长度。','../assembly/report.json',bad)
         check('assembly_dimensions','装配补全后的杆件与接缝尺寸','fail' if ac['bom_differences'] or ac['pending_connections'] else 'pending',
               f"反算修正 {ac['corrected_face_count']} 个面，{ac['bom_differences']} 条杆长/BOM 差异，{ac['pending_connections']} 条接缝待核对；按邻面补全不计为独立验证。",'../assembly/report.json')
     else:

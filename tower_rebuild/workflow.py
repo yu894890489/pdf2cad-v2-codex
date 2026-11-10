@@ -114,7 +114,7 @@ def write_input_review(out, state):
     (out / 'input-review.md').write_text('\n'.join(lines), encoding='utf-8')
 
 
-def process_drawing(pdf, out, table_regions=None, review=None, title=None, config=None):
+def process_drawing(pdf, out, table_regions=None, review=None, title=None, config=None, schematic_map=None):
     """New output per run; never mix an old model with a new source or attempt."""
     options = load_workflow_settings(config)
     pdf, out = Path(pdf).resolve(), Path(out).resolve()
@@ -160,7 +160,7 @@ def process_drawing(pdf, out, table_regions=None, review=None, title=None, confi
             state['pages'] = inspect_pdf(source, allow_outline=options.ocr.mode == 'auto')
             state['input_coverage'] = input_coverage(state['pages'])
             state['input_files'] = {}
-            for name, path in [('table-regions', table_regions), ('review', review)]:
+            for name, path in [('table-regions', table_regions), ('review', review), ('schematic-map', schematic_map)]:
                 if path:
                     target = source.parent / (name + '.json')
                     shutil.copy2(Path(path).resolve(), target)
@@ -195,7 +195,7 @@ def process_drawing(pdf, out, table_regions=None, review=None, title=None, confi
         report = step('topology', lambda: topology(out, state['input_files'].get('review')))
         if not report['counts']['views']:
             raise UnsupportedDrawing('没有分出可核对的结构视图；表格与图元结果已保留。')
-        audit = step('audit', lambda: audit_dimensions(out))
+        audit = step('audit', lambda: audit_dimensions(out, state['input_files']['schematic-map']) if 'schematic-map' in state['input_files'] else audit_dimensions(out))
         check = step('preview', lambda: build_preview(out))
         comparison = step('model_audit', lambda: audit_model_dimensions(out, options.diagnostic_tolerance_mm))
         state['model_dimension_counts'] = comparison['counts']

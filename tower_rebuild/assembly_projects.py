@@ -102,6 +102,7 @@ class AssemblyProjects:
                         members_path=top/'members.json'
                         members_verified=any(name.replace('\\','/')=='topology/members.json' for name in model.get('input_files',{}))
                         sources.append({**info,'model':model,'views':views,'geometry':geometry,
+                                        'schematic':read_json(run/'site/audit/report.json').get('schematic') if 'audit/report.json' in {n.replace('\\','/') for n in model.get('input_files',{})} else None,
                                         'pdf_path':str(self.jobs.root/jid/'source.pdf'),
                                         'member_observations':read_json(members_path) if members_verified and members_path.is_file() else [],
                                         'bom':read_json(bom_path) if bom_verified and bom_path.is_file() else []})
@@ -249,6 +250,17 @@ class AssemblyProjects:
     def listing(self):
         with self.jobs.lock:
             return [self.snapshot(aid) for aid in sorted(self.records,key=lambda a:self.records[a]['created_at'],reverse=True)]
+
+    def export_final_bom(self, aid):
+        from .final_bom import build_final_bom, load_original_tables, publish_final_bom
+        with self.jobs.lock:
+            # Effective faces already contain corrections and current scale overrides.
+            # Reading an export never reruns the solver or changes saved placement.
+            snapshot = self.snapshot(aid, full=True)
+            sources, _, _ = self.source_data(self.records[aid])
+            for source in sources:
+                source.update(load_original_tables(self.jobs.root/source['id']/'run'))
+            return publish_final_bom(build_final_bom(sources, snapshot), self.root/aid/'final-bom', parts_url='../part-drawings/')
 
     def mutate(self, aid, body):
         with self.jobs.lock:

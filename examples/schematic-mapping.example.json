@@ -1,0 +1,27 @@
+{
+  "source_sha256": "从当前 template.json 复制",
+  "input_sha256": "从当前 template.json 复制",
+  "derived_dimensions": [
+    {
+      "id": "derived_crossarm_lower",
+      "measurement": "x",
+      "scope": "横担层下边，排除塔身梯形",
+      "terms": [
+        {"dimension_id": "原图7000尺寸的ID", "factor": 1},
+        {"dimension_id": "原图3364尺寸的ID", "factor": 0.5},
+        {"dimension_id": "原图480尺寸的ID", "factor": 0.5}
+      ]
+    }
+  ],
+  "bindings": [
+    {
+      "dimension_id": "derived_crossarm_lower",
+      "member_ids": ["当前结构面的杆件观察ID"],
+      "measurement": "x",
+      "correspondence_confirmed": true,
+      "end_basis_confirmed": false,
+      "offsets": [],
+      "correction": {"member_id": "当前结构面的杆件观察ID", "anchor": "a", "apply": false}
+    }
+  ]
+}
